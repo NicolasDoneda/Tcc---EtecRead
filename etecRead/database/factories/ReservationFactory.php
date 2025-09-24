@@ -13,8 +13,8 @@ class ReservationFactory extends Factory
     public function definition()
     {
         return [
-            'user_id' => User::factory(),
-            'book_id' => Book::factory(),
+            'user_id' => User::inRandomOrder()->first()->id, // usa usuário existente
+            'book_id' => Book::inRandomOrder()->first()->id, // usa livro existente
             'status' => 'pendente',
             'reserved_at' => $this->faker->dateTimeBetween('-1 month', 'now'),
         ];

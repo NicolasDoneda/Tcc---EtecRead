@@ -25,12 +25,14 @@ class LoanController extends Controller
         ]);
 
         $loan = Loan::create($data);
+
         return response()->json($loan->load(['user', 'book', 'reservation']), 201);
     }
 
-    public function show(Loan $loan)
+    public function show($id)
     {
-        return $loan->load(['user', 'book', 'reservation']);
+        $loan = Loan::with(['user', 'book', 'reservation'])->findOrFail($id);
+        return response()->json($loan);
     }
 
     public function update(Request $request, Loan $loan)
@@ -46,6 +48,7 @@ class LoanController extends Controller
         ]);
 
         $loan->update($data);
+
         return response()->json($loan->load(['user', 'book', 'reservation']));
     }
 

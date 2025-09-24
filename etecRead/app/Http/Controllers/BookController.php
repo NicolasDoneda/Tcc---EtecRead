@@ -21,11 +21,12 @@ class BookController extends Controller
             'year' => 'nullable|integer',
             'total_quantity' => 'required|integer',
             'available_quantity' => 'required|integer',
-            'authors' => 'array', // autores associados
+            'authors' => 'array',
             'authors.*' => 'exists:authors,id',
         ]);
 
         $book = Book::create($data);
+
         if (!empty($data['authors'])) {
             $book->authors()->sync($data['authors']);
         }
@@ -33,9 +34,10 @@ class BookController extends Controller
         return response()->json($book->load('authors', 'category'), 201);
     }
 
-    public function show(Book $book)
+    public function show($id)
     {
-        return $book->load('authors', 'category');
+        $book = Book::with('authors', 'category')->findOrFail($id);
+        return response()->json($book);
     }
 
     public function update(Request $request, Book $book)
@@ -52,6 +54,7 @@ class BookController extends Controller
         ]);
 
         $book->update($data);
+
         if (isset($data['authors'])) {
             $book->authors()->sync($data['authors']);
         }

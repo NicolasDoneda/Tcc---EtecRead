@@ -21,12 +21,14 @@ class ReservationController extends Controller
         ]);
 
         $reservation = Reservation::create($data);
+
         return response()->json($reservation->load(['user', 'book']), 201);
     }
 
-    public function show(Reservation $reservation)
+    public function show($id)
     {
-        return $reservation->load(['user', 'book']);
+        $reservation = Reservation::with(['user', 'book'])->findOrFail($id);
+        return response()->json($reservation);
     }
 
     public function update(Request $request, Reservation $reservation)
@@ -38,6 +40,7 @@ class ReservationController extends Controller
         ]);
 
         $reservation->update($data);
+
         return response()->json($reservation->load(['user', 'book']));
     }
 

@@ -25,9 +25,10 @@ class AuthorController extends Controller
         return response()->json($author, 201);
     }
 
-    public function show(Author $author)
+    public function show($id)
     {
-        return $author;
+        $author = Author::findOrFail($id);
+        return response()->json($author);
     }
 
     public function update(Request $request, Author $author)

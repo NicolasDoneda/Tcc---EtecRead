@@ -4,8 +4,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Illuminate\Support\Facades\Facade;
 
-return Application::configure(basePath: dirname(__DIR__))
+$app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
@@ -20,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
         
-        // Configuração do grupo WEB, se desejar
+        // Configuração do grupo WEB
         $middleware->web(append: [
             \Illuminate\Cookie\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
@@ -34,3 +35,8 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->create();
+
+// Registrar facades para funcionar com Tinker e outras facades
+Facade::setFacadeApplication($app);
+
+return $app;

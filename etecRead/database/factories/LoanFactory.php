@@ -13,14 +13,16 @@ class LoanFactory extends Factory
 
     public function definition()
     {
+        $reservation = Reservation::inRandomOrder()->first(); // pega uma reserva existente ou null
+
         return [
-            'user_id' => User::factory(),
-            'book_id' => Book::factory(),
+            'user_id' => $reservation ? $reservation->user_id : User::inRandomOrder()->first()->id,
+            'book_id' => $reservation ? $reservation->book_id : Book::inRandomOrder()->first()->id,
             'loan_date' => $this->faker->dateTimeBetween('-1 month', 'now'),
             'due_date' => $this->faker->dateTimeBetween('now', '+1 month'),
             'return_date' => null,
             'status' => 'ativo',
-            'reservation_id' => null,
+            'reservation_id' => $reservation ? $reservation->id : null,
         ];
     }
 }

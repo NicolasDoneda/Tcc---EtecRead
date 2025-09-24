@@ -14,7 +14,7 @@ class BookFactory extends Factory
         return [
             'isbn' => $this->faker->unique()->isbn13,
             'title' => $this->faker->sentence(3),
-            'category_id' => Category::factory(),
+            'category_id' => Category::inRandomOrder()->first()->id, // usa categoria existente
             'year' => $this->faker->year(),
             'total_quantity' => $this->faker->numberBetween(1, 10),
             'available_quantity' => $this->faker->numberBetween(1, 10),

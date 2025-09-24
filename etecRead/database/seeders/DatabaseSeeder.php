@@ -3,21 +3,51 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use App\Models\Category;
+use App\Models\Author;
+use App\Models\User;
+use App\Models\Book;
+use App\Models\Reservation;
+use App\Models\Loan;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        \App\Models\Category::factory(5)->create();
-        \App\Models\Author::factory(10)->create();
-        \App\Models\User::factory(10)->create();
+        // 1️⃣ Cria categorias
+        $categories = Category::factory(5)->create();
 
-        \App\Models\Book::factory(15)->create()->each(function ($book) {
-            $authors = \App\Models\Author::inRandomOrder()->take(rand(1, 3))->pluck('id');
-            $book->authors()->sync($authors);
+        // 2️⃣ Cria autores
+        $authors = Author::factory(10)->create();
+
+        // 3️⃣ Cria usuários (alunos)
+        $users = User::factory(10)->create();
+
+        // 4️⃣ Cria livros e associa autores
+        $books = Book::factory(15)->create()->each(function ($book) use ($authors, $categories) {
+            // Garante que o livro tenha uma categoria existente
+            $book->category_id = $categories->random()->id;
+            $book->save();
+
+            // Associa de 1 a 3 autores existentes
+            $bookAuthors = $authors->random(rand(1, 3))->pluck('id')->toArray();
+            $book->authors()->sync($bookAuthors);
         });
 
-        \App\Models\Reservation::factory(10)->create();
-        \App\Models\Loan::factory(10)->create();
+        // 5️⃣ Cria reservas associando livros e usuários existentes
+        $reservations = Reservation::factory(10)->create()->each(function ($reservation) use ($users, $books) {
+            $reservation->user_id = $users->random()->id;
+            $reservation->book_id = $books->random()->id;
+            $reservation->save();
+        });
+
+        // 6️⃣ Cria empréstimos, associando usuários, livros e reservas existentes
+        Loan::factory(10)->create()->each(function ($loan) use ($users, $books, $reservations) {
+            $reservation = $reservations->random();
+            $loan->user_id = $reservation->user_id;
+            $loan->book_id = $reservation->book_id;
+            $loan->reservation_id = $reservation->id;
+            $loan->save();
+        });
     }
 }
