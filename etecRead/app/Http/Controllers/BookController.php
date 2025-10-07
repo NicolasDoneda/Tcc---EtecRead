@@ -9,7 +9,7 @@ class BookController extends Controller
 {
     public function index()
     {
-        return Book::with('authors', 'category')->get();
+        return Book::with(['authors', 'category'])->get();
     }
 
     public function store(Request $request)
@@ -19,8 +19,8 @@ class BookController extends Controller
             'title' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'year' => 'nullable|integer',
-            'total_quantity' => 'required|integer',
-            'available_quantity' => 'required|integer',
+            'total_quantity' => 'required|integer|min:0',
+            'available_quantity' => 'required|integer|min:0',
             'authors' => 'array',
             'authors.*' => 'exists:authors,id',
         ]);
@@ -31,24 +31,36 @@ class BookController extends Controller
             $book->authors()->sync($data['authors']);
         }
 
-        return response()->json($book->load('authors', 'category'), 201);
+        // Recarrega relações antes de retornar
+        return response()->json($book->load(['authors', 'category']), 201);
     }
 
     public function show($id)
     {
-        $book = Book::with('authors', 'category')->findOrFail($id);
+        $book = Book::with(['authors', 'category'])->find($id);
+
+        if (!$book) {
+            return response()->json(['message' => 'Livro não encontrado'], 404);
+        }
+
         return response()->json($book);
     }
 
-    public function update(Request $request, Book $book)
+    public function update(Request $request, $id)
     {
+        $book = Book::find($id);
+
+        if (!$book) {
+            return response()->json(['message' => 'Livro não encontrado'], 404);
+        }
+
         $data = $request->validate([
             'isbn' => 'nullable|string|unique:books,isbn,' . $book->id,
             'title' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'year' => 'nullable|integer',
-            'total_quantity' => 'required|integer',
-            'available_quantity' => 'required|integer',
+            'total_quantity' => 'required|integer|min:0',
+            'available_quantity' => 'required|integer|min:0',
             'authors' => 'array',
             'authors.*' => 'exists:authors,id',
         ]);
@@ -59,12 +71,22 @@ class BookController extends Controller
             $book->authors()->sync($data['authors']);
         }
 
-        return response()->json($book->load('authors', 'category'));
+        // Recarrega as relações após atualizar
+        $book->load(['authors', 'category']);
+
+        return response()->json($book);
     }
 
-    public function destroy(Book $book)
+    public function destroy($id)
     {
+        $book = Book::find($id);
+
+        if (!$book) {
+            return response()->json(['message' => 'Livro não encontrado'], 404);
+        }
+
         $book->delete();
-        return response()->json(null, 204);
+
+        return response()->json(['message' => 'Livro deletado com sucesso'], 200);
     }
 }

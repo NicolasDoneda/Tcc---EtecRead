@@ -22,17 +22,29 @@ class AuthorController extends Controller
         ]);
 
         $author = Author::create($data);
+
         return response()->json($author, 201);
     }
 
     public function show($id)
     {
-        $author = Author::findOrFail($id);
+        $author = Author::find($id);
+
+        if (!$author) {
+            return response()->json(['message' => 'Autor não encontrado'], 404);
+        }
+
         return response()->json($author);
     }
 
-    public function update(Request $request, Author $author)
+    public function update(Request $request, $id)
     {
+        $author = Author::find($id);
+
+        if (!$author) {
+            return response()->json(['message' => 'Autor não encontrado'], 404);
+        }
+
         $data = $request->validate([
             'name' => 'required|string',
             'bio' => 'nullable|string',
@@ -41,12 +53,23 @@ class AuthorController extends Controller
         ]);
 
         $author->update($data);
-        return response()->json($author);
+
+        return response()->json([
+            'message' => 'Autor atualizado com sucesso',
+            'author' => $author
+        ]);
     }
 
-    public function destroy(Author $author)
+    public function destroy($id)
     {
+        $author = Author::find($id);
+
+        if (!$author) {
+            return response()->json(['message' => 'Autor não encontrado'], 404);
+        }
+
         $author->delete();
-        return response()->json(null, 204);
+
+        return response()->json(['message' => 'Autor deletado com sucesso'], 200);
     }
 }

@@ -35,8 +35,10 @@ class LoanController extends Controller
         return response()->json($loan);
     }
 
-    public function update(Request $request, Loan $loan)
+    public function update(Request $request, $id)
     {
+        $loan = Loan::findOrFail($id);
+
         $data = $request->validate([
             'user_id' => 'required|exists:users,id',
             'book_id' => 'required|exists:books,id',
@@ -52,9 +54,11 @@ class LoanController extends Controller
         return response()->json($loan->load(['user', 'book', 'reservation']));
     }
 
-    public function destroy(Loan $loan)
+    public function destroy($id)
     {
+        $loan = Loan::findOrFail($id);
         $loan->delete();
-        return response()->json(null, 204);
+
+        return response()->json(['message' => 'Empréstimo deletado com sucesso'], 200);
     }
 }
