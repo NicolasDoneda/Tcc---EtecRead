@@ -6,11 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-
 class Loan extends Model
 {
     use HasFactory;
-    protected $fillable = ['user_id', 'book_id', 'loan_date', 'due_date', 'return_date', 'status', 'reservation_id'];
+    
+    protected $fillable = [
+        'user_id', 
+        'book_id', 
+        'loan_date', 
+        'due_date', 
+        'return_date', 
+        'status', 
+        'reservation_id'
+    ];
 
     public function user(): BelongsTo
     {
