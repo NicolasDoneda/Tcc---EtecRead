@@ -2,29 +2,42 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-
 
 class User extends Authenticatable
 {
-    use HasFactory;
-    use HasApiTokens, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
-    protected $fillable = ['rm', 'email', 'name', 'password', 'role', 'status', 'photo'];
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'rm',
+        'role',
+        'ano_escolar',
+    ];
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
-    public function reservations(): HasMany
-    {
-        return $this->hasMany(Reservation::class);
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
 
-    public function loans(): HasMany
+    public function loans()
     {
         return $this->hasMany(Loan::class);
+    }
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
     }
 }

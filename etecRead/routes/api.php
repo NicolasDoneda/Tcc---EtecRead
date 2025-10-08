@@ -107,5 +107,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('loans', [LoanController::class, 'store']);
         Route::put('loans/{id}', [LoanController::class, 'update']);
         Route::delete('loans/{id}', [LoanController::class, 'destroy']);
+
+        Route::post('admin/delete-graduated-students', function() {
+    \Artisan::call('students:delete-graduated');
+    $output = \Artisan::output();
+    
+    return response()->json([
+        'message' => 'Comando executado',
+        'output' => $output
+    ]);
+});
     });
 });
