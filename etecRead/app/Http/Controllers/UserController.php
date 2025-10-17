@@ -22,7 +22,7 @@ class UserController extends Controller
             'password' => 'required|string|min:6',
             'rm' => 'nullable|string|unique:users,rm|max:50',
             'role' => 'required|in:aluno,admin',
-            'ano_escolar' => 'nullable|in:1,2,3',
+            'ano_escolar' => 'required_if:role,aluno|nullable|in:1,2,3',
         ]);
 
         $data['password'] = Hash::make($data['password']);

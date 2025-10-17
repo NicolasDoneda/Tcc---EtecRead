@@ -8,7 +8,6 @@ use App\Models\User;
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\BookController;
-use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\LoanController;
@@ -23,10 +22,11 @@ use App\Http\Middleware\IsAdmin;
 // Registro de alunos (role = aluno)
 Route::post('/register', function(Request $request) {
     $request->validate([
-        'name' => 'required|string',
+        'name' => 'required|string|max:255',
         'email' => 'required|email|unique:users',
-        'password' => 'required|string|min:6',
-        'rm' => 'nullable|string|unique:users',
+        'password' => 'required|string|min:6|confirmed',
+        'rm' => 'nullable|string|unique:users|max:50',
+        'ano_escolar' => 'required|in:1,2,3',
     ]);
 
     $user = User::create([
@@ -35,6 +35,7 @@ Route::post('/register', function(Request $request) {
         'rm' => $request->rm,
         'password' => Hash::make($request->password),
         'role' => 'aluno',
+        'ano_escolar' => $request->ano_escolar,
     ]);
 
     return response()->json($user, 201);
@@ -51,7 +52,7 @@ Route::post('/login', function(Request $request) {
     $user = Auth::user();
     $token = $user->createToken('api-token')->plainTextToken;
 
-    return response()->json(['token' => $token, 'role' => $user->role]);
+    return response()->json(['token' => $token, 'role' => $user->role, 'user' => $user]);
 });
 
 /*
@@ -68,9 +69,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('books', [BookController::class, 'index']);
     Route::get('books/{id}', [BookController::class, 'show']);
-
-    Route::get('authors', [AuthorController::class, 'index']);
-    Route::get('authors/{id}', [AuthorController::class, 'show']);
 
     Route::get('reservations', [ReservationController::class, 'index']);
     Route::get('reservations/{id}', [ReservationController::class, 'show']);
@@ -93,11 +91,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('books/{id}', [BookController::class, 'update']);
         Route::delete('books/{id}', [BookController::class, 'destroy']);
 
-        // Authors
-        Route::post('authors', [AuthorController::class, 'store']);
-        Route::put('authors/{id}', [AuthorController::class, 'update']);
-        Route::delete('authors/{id}', [AuthorController::class, 'destroy']);
-
         // Reservations
         Route::post('reservations', [ReservationController::class, 'store']);
         Route::put('reservations/{id}', [ReservationController::class, 'update']);
@@ -108,14 +101,25 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::put('loans/{id}', [LoanController::class, 'update']);
         Route::delete('loans/{id}', [LoanController::class, 'destroy']);
 
+        // Comandos manuais
+        Route::post('admin/promote-students', function() {
+            \Artisan::call('students:promote');
+            $output = \Artisan::output();
+            
+            return response()->json([
+                'message' => 'Promoção de alunos executada',
+                'output' => $output
+            ]);
+        });
+
         Route::post('admin/delete-graduated-students', function() {
-    \Artisan::call('students:delete-graduated');
-    $output = \Artisan::output();
-    
-    return response()->json([
-        'message' => 'Comando executado',
-        'output' => $output
-    ]);
-});
+            \Artisan::call('students:delete-graduated');
+            $output = \Artisan::output();
+            
+            return response()->json([
+                'message' => 'Exclusão de formandos executada',
+                'output' => $output
+            ]);
+        });
     });
 });

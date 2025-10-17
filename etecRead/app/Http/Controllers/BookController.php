@@ -9,82 +9,68 @@ class BookController extends Controller
 {
     public function index()
     {
-        return Book::with(['authors', 'category'])->get();
+        return Book::with('category')->get();
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'isbn' => 'nullable|string|unique:books,isbn',
-            'title' => 'required|string',
+            'title' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'year' => 'nullable|integer',
+            'isbn' => 'nullable|string|unique:books,isbn',
+            'year' => 'nullable|integer|min:1000|max:' . date('Y'),
             'total_quantity' => 'required|integer|min:0',
             'available_quantity' => 'required|integer|min:0',
-            'authors' => 'array',
-            'authors.*' => 'exists:authors,id',
         ]);
+
+        // Validação: available_quantity não pode ser maior que total_quantity
+        if ($data['available_quantity'] > $data['total_quantity']) {
+            return response()->json([
+                'error' => 'Quantidade disponível não pode ser maior que quantidade total'
+            ], 422);
+        }
 
         $book = Book::create($data);
 
-        if (!empty($data['authors'])) {
-            $book->authors()->sync($data['authors']);
-        }
-
-        // Recarrega relações antes de retornar
-        return response()->json($book->load(['authors', 'category']), 201);
+        return response()->json($book->load('category'), 201);
     }
 
     public function show($id)
     {
-        $book = Book::with(['authors', 'category'])->find($id);
-
-        if (!$book) {
-            return response()->json(['message' => 'Livro não encontrado'], 404);
-        }
-
+        $book = Book::with('category')->findOrFail($id);
         return response()->json($book);
     }
 
     public function update(Request $request, $id)
     {
-        $book = Book::find($id);
-
-        if (!$book) {
-            return response()->json(['message' => 'Livro não encontrado'], 404);
-        }
+        $book = Book::findOrFail($id);
 
         $data = $request->validate([
-            'isbn' => 'nullable|string|unique:books,isbn,' . $book->id,
-            'title' => 'required|string',
-            'category_id' => 'required|exists:categories,id',
-            'year' => 'nullable|integer',
-            'total_quantity' => 'required|integer|min:0',
-            'available_quantity' => 'required|integer|min:0',
-            'authors' => 'array',
-            'authors.*' => 'exists:authors,id',
+            'title' => 'sometimes|required|string|max:255',
+            'category_id' => 'sometimes|required|exists:categories,id',
+            'isbn' => 'nullable|string|unique:books,isbn,' . $id,
+            'year' => 'nullable|integer|min:1000|max:' . date('Y'),
+            'total_quantity' => 'sometimes|required|integer|min:0',
+            'available_quantity' => 'sometimes|required|integer|min:0',
         ]);
+
+        // Validação: available_quantity não pode ser maior que total_quantity
+        if (isset($data['available_quantity']) && isset($data['total_quantity'])) {
+            if ($data['available_quantity'] > $data['total_quantity']) {
+                return response()->json([
+                    'error' => 'Quantidade disponível não pode ser maior que quantidade total'
+                ], 422);
+            }
+        }
 
         $book->update($data);
 
-        if (isset($data['authors'])) {
-            $book->authors()->sync($data['authors']);
-        }
-
-        // Recarrega as relações após atualizar
-        $book->load(['authors', 'category']);
-
-        return response()->json($book);
+        return response()->json($book->load('category'));
     }
 
     public function destroy($id)
     {
-        $book = Book::find($id);
-
-        if (!$book) {
-            return response()->json(['message' => 'Livro não encontrado'], 404);
-        }
-
+        $book = Book::findOrFail($id);
         $book->delete();
 
         return response()->json(['message' => 'Livro deletado com sucesso'], 200);

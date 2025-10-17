@@ -21,6 +21,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
         
+        
         // Configuração do grupo WEB
         $middleware->web(append: [
             \Illuminate\Cookie\Middleware\EncryptCookies::class,
@@ -29,6 +30,11 @@ $app = Application::configure(basePath: dirname(__DIR__))
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        ]);
+        
+        // ✅ ADICIONE ISSO: Registrar alias do middleware admin
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

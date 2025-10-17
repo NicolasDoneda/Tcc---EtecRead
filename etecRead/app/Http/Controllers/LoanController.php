@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Loan;
+use App\Models\Book;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use Carbon\Carbon;
 
 class LoanController extends Controller
 {
@@ -16,25 +19,64 @@ class LoanController extends Controller
 
     public function store(Request $request)
     {
-        Log::info('=== INÍCIO STORE ===');
+        Log::info('=== INÍCIO STORE LOAN ===');
         Log::info('Dados recebidos:', $request->all());
 
         try {
             $validated = $request->validate([
                 'user_id' => 'required|exists:users,id',
                 'book_id' => 'required|exists:books,id',
-                'due_date' => 'nullable|date',
+                'due_date' => 'nullable|date|after:today',
                 'return_date' => 'nullable|date',
                 'status' => 'nullable|in:ativo,finalizado',
                 'reservation_id' => 'nullable|exists:reservations,id',
             ]);
             
             Log::info('✅ PASSOU NA VALIDAÇÃO!');
-            Log::info('Dados validados:', $validated);
             
         } catch (ValidationException $e) {
             Log::error('❌ ERRO DE VALIDAÇÃO:', $e->errors());
             throw $e;
+        }
+
+        // Verifica se o usuário existe e é aluno
+        $user = User::find($validated['user_id']);
+        if ($user->role !== 'aluno') {
+            return response()->json([
+                'error' => 'Apenas alunos podem fazer empréstimos'
+            ], 422);
+        }
+
+        // Verifica se o livro tem estoque disponível
+        $book = Book::find($validated['book_id']);
+        if (!$book->hasAvailableStock()) {
+            return response()->json([
+                'error' => 'Livro sem estoque disponível',
+                'available_quantity' => $book->available_quantity
+            ], 422);
+        }
+
+        // Verifica se o aluno já tem empréstimo ativo deste livro
+        $emprestimoAtivo = Loan::where('user_id', $validated['user_id'])
+            ->where('book_id', $validated['book_id'])
+            ->where('status', 'ativo')
+            ->exists();
+
+        if ($emprestimoAtivo) {
+            return response()->json([
+                'error' => 'Você já possui um empréstimo ativo deste livro'
+            ], 422);
+        }
+
+        // Verifica limite de empréstimos ativos (máximo 3)
+        $totalEmprestimosAtivos = Loan::where('user_id', $validated['user_id'])
+            ->where('status', 'ativo')
+            ->count();
+
+        if ($totalEmprestimosAtivos >= 3) {
+            return response()->json([
+                'error' => 'Você atingiu o limite de 3 empréstimos simultâneos'
+            ], 422);
         }
 
         // Remove campos null
@@ -42,19 +84,27 @@ class LoanController extends Controller
             return $value !== null;
         });
 
-        Log::info('Dados após filtrar nulls:', $data);
+        // Define loan_date e due_date se não fornecidos
+        $data['loan_date'] = $data['loan_date'] ?? Carbon::now();
+        $data['due_date'] = $data['due_date'] ?? Carbon::now()->addDays(14); // 14 dias padrão
+        $data['status'] = $data['status'] ?? 'ativo';
+
+        Log::info('Dados processados:', $data);
 
         try {
-            Log::info('Tentando criar Loan...');
+            // Cria o empréstimo
             $loan = Loan::create($data);
-            Log::info('✅ LOAN CRIADO!', ['id' => $loan->id, 'loan' => $loan->toArray()]);
+            
+            // Diminui o estoque do livro
+            $book->decreaseStock();
+            
+            Log::info('✅ LOAN CRIADO!', ['id' => $loan->id]);
             
             return response()->json($loan->load(['user', 'book', 'reservation']), 201);
             
         } catch (\Exception $e) {
             Log::error('❌ ERRO AO CRIAR LOAN');
             Log::error('Mensagem: ' . $e->getMessage());
-            Log::error('Arquivo: ' . $e->getFile() . ':' . $e->getLine());
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -67,13 +117,10 @@ class LoanController extends Controller
 
     public function update(Request $request, $id)
     {
-        Log::info('=== INÍCIO UPDATE ===');
-        Log::info('Loan ID:', ['id' => $id]);
+        Log::info('=== INÍCIO UPDATE LOAN ===');
         
         $loan = Loan::findOrFail($id);
         Log::info('Loan encontrado:', $loan->toArray());
-
-        Log::info('Dados recebidos:', $request->all());
 
         try {
             $validated = $request->validate([
@@ -96,6 +143,16 @@ class LoanController extends Controller
             return $value !== null;
         });
 
+        // Se mudou o status para finalizado e estava ativo, aumenta estoque
+        if (isset($data['status']) && $data['status'] === 'finalizado' && $loan->status === 'ativo') {
+            $data['return_date'] = $data['return_date'] ?? Carbon::now();
+            
+            // Aumenta o estoque do livro
+            $loan->book->increaseStock();
+            
+            Log::info('Empréstimo finalizado, estoque aumentado');
+        }
+
         try {
             $loan->update($data);
             Log::info('✅ LOAN ATUALIZADO!', $loan->toArray());
@@ -111,6 +168,12 @@ class LoanController extends Controller
     public function destroy($id)
     {
         $loan = Loan::findOrFail($id);
+        
+        // Se o empréstimo está ativo, devolve o estoque
+        if ($loan->status === 'ativo') {
+            $loan->book->increaseStock();
+        }
+        
         $loan->delete();
 
         return response()->json(['message' => 'Empréstimo deletado com sucesso'], 200);
