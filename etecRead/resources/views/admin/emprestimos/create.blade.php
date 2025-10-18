@@ -59,3 +59,25 @@
                 </div>
 
                 <!-- Data de Devolução -->
+                <div class="md:col-span-2">
+                    <label class="block text-gray-700 font-semibold mb-2">Data de Devolução Prevista *</label>
+                    <input type="date" name="due_date" value="{{ old('due_date', now()->addDays(14)->format('Y-m-d')) }}" 
+                           min="{{ now()->addDay()->format('Y-m-d') }}"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                           required>
+                    <p class="text-xs text-gray-500 mt-1">Prazo padrão: 14 dias a partir de hoje</p>
+                </div>
+            </div>
+
+            <div class="mt-8 flex gap-4">
+                <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-semibold">
+                    Criar Empréstimo
+                </button>
+                <a href="{{ route('admin.emprestimos.index') }}" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition font-semibold">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+@endsection

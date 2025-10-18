@@ -1,137 +1,156 @@
 @extends('layouts.app')
 
-@section('title', 'Minhas Reservas')
+@section('title', 'Gerenciar Reservas')
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4">
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">📌 Minhas Reservas</h1>
-        <p class="text-gray-600 mt-2">Acompanhe suas reservas de livros</p>
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">📌 Gerenciar Reservas</h1>
+            <p class="text-gray-600 mt-2">Controle as reservas de livros dos alunos</p>
+        </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow-lg p-6">
+    <!-- Filtros -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+        <form method="GET" action="{{ route('admin.reservas.index') }}" class="flex gap-4">
+            <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <option value="">Todos os status</option>
+                <option value="pendente" {{ request('status') == 'pendente' ? 'selected' : '' }}>Pendentes</option>
+                <option value="confirmada" {{ request('status') == 'confirmada' ? 'selected' : '' }}>Confirmadas</option>
+                <option value="cancelada" {{ request('status') == 'cancelada' ? 'selected' : '' }}>Canceladas</option>
+            </select>
+            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-semibold">
+                🔍 Filtrar
+            </button>
+            @if(request('status'))
+            <a href="{{ route('admin.reservas.index') }}" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition font-semibold">
+                Limpar
+            </a>
+            @endif
+        </form>
+    </div>
+
+    <!-- Estatísticas Rápidas -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <p class="text-yellow-600 text-sm font-semibold">Pendentes</p>
+            <p class="text-3xl font-bold text-yellow-800">{{ $reservas->where('status', 'pendente')->count() }}</p>
+        </div>
         
-        @if($reservas->count() > 0)
-            <!-- Estatísticas -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <p class="text-yellow-600 text-sm font-semibold">Pendentes</p>
-                    <p class="text-3xl font-bold text-yellow-800">{{ $reservas->where('status', 'pendente')->count() }}</p>
-                </div>
-                
-                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <p class="text-green-600 text-sm font-semibold">Confirmadas</p>
-                    <p class="text-3xl font-bold text-green-800">{{ $reservas->where('status', 'confirmada')->count() }}</p>
-                </div>
-                
-                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <p class="text-red-600 text-sm font-semibold">Canceladas</p>
-                    <p class="text-3xl font-bold text-red-800">{{ $reservas->where('status', 'cancelada')->count() }}</p>
-                </div>
-            </div>
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+            <p class="text-green-600 text-sm font-semibold">Confirmadas</p>
+            <p class="text-3xl font-bold text-green-800">{{ $reservas->where('status', 'confirmada')->count() }}</p>
+        </div>
+        
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p class="text-red-600 text-sm font-semibold">Canceladas</p>
+            <p class="text-3xl font-bold text-red-800">{{ $reservas->where('status', 'cancelada')->count() }}</p>
+        </div>
+    </div>
 
-            <!-- Lista de Reservas -->
-            <div class="space-y-4">
-                @foreach($reservas as $reserva)
-                <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition">
-                    <div class="flex items-start justify-between">
-                        
-                        <!-- Informações do Livro -->
-                        <div class="flex-1">
-                            <div class="flex items-start">
-                                <div class="bg-purple-100 rounded-lg p-4 mr-4">
-                                    <svg class="w-12 h-12 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
-                                    </svg>
-                                </div>
-                                
-                                <div>
-                                    <h3 class="text-xl font-bold text-gray-800 mb-2">{{ $reserva->book->title }}</h3>
-                                    
-                                    <div class="space-y-2 text-sm text-gray-600">
-                                        <p class="flex items-center">
-                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                                            </svg>
-                                            Categoria: <span class="font-semibold ml-1">{{ $reserva->book->category->name }}</span>
-                                        </p>
-                                        
-                                        <p class="flex items-center">
-                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                            </svg>
-                                            Reservado em: <span class="font-semibold ml-1">{{ \Carbon\Carbon::parse($reserva->reservation_date)->format('d/m/Y H:i') }}</span>
-                                        </p>
-
-                                        <p class="flex items-center">
-                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                                            </svg>
-                                            Disponíveis: <span class="font-semibold ml-1">{{ $reserva->book->available_quantity }} unidades</span>
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Status -->
-                        <div class="text-right">
+    <!-- Tabela -->
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <table class="min-w-full">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">ID</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Aluno</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Livro</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Data Reserva</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Disponível</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @forelse($reservas as $reserva)
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 text-sm text-gray-600">{{ $reserva->id }}</td>
+                    <td class="px-6 py-4">
+                        <p class="font-semibold text-gray-800">{{ $reserva->user->name }}</p>
+                        <p class="text-xs text-gray-500">{{ $reserva->user->email }}</p>
+                        @if($reserva->user->rm)
+                            <p class="text-xs text-gray-500">RM: {{ $reserva->user->rm }}</p>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4">
+                        <p class="font-semibold text-gray-800">{{ $reserva->book->title }}</p>
+                        <p class="text-xs text-gray-500">{{ $reserva->book->category->name }}</p>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600">
+                        {{ \Carbon\Carbon::parse($reserva->reservation_date)->format('d/m/Y H:i') }}
+                    </td>
+                    <td class="px-6 py-4">
+                        @if($reserva->book->available_quantity > 0)
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
+                                ✓ {{ $reserva->book->available_quantity }} un.
+                            </span>
+                        @else
+                            <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold">
+                                ✗ Sem estoque
+                            </span>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4">
+                        @if($reserva->status === 'pendente')
+                            <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">
+                                ⏳ Pendente
+                            </span>
+                        @elseif($reserva->status === 'confirmada')
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
+                                ✓ Confirmada
+                            </span>
+                        @else
+                            <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold">
+                                ✗ Cancelada
+                            </span>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                            @if($reserva->status === 'pendente' && $reserva->book->available_quantity > 0)
+                                <form method="POST" action="{{ route('admin.reservas.confirmar', $reserva->id) }}" class="inline">
+                                    @csrf
+                                    <button type="submit" 
+                                            class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm font-semibold"
+                                            onclick="return confirm('Confirmar reserva e enviar email para o aluno?')">
+                                        ✓ Confirmar
+                                    </button>
+                                </form>
+                            @endif
+                            
                             @if($reserva->status === 'pendente')
-                                <span class="bg-yellow-100 text-yellow-800 text-sm px-4 py-2 rounded-full font-semibold">
-                                    ⏳ Pendente
-                                </span>
-                                <p class="text-xs text-gray-600 mt-2">Aguardando disponibilidade</p>
-                            @elseif($reserva->status === 'confirmada')
-                                <span class="bg-green-100 text-green-800 text-sm px-4 py-2 rounded-full font-semibold">
-                                    ✓ Confirmada
-                                </span>
-                                <p class="text-xs text-gray-600 mt-2">Procure a biblioteca</p>
-                            @else
-                                <span class="bg-red-100 text-red-800 text-sm px-4 py-2 rounded-full font-semibold">
-                                    ✗ Cancelada
-                                </span>
+                                <form method="POST" action="{{ route('admin.reservas.cancelar', $reserva->id) }}" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" 
+                                            class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm font-semibold"
+                                            onclick="return confirm('Cancelar esta reserva?')">
+                                        ✗ Cancelar
+                                    </button>
+                                </form>
                             @endif
                         </div>
-                    </div>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                        </svg>
+                        <p>Nenhuma reserva encontrada</p>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 
-                    <!-- Ações -->
-                    @if($reserva->status === 'confirmada')
-                    <div class="mt-4 pt-4 border-t border-gray-200">
-                        <div class="bg-green-50 border border-green-200 rounded-lg p-3">
-                            <p class="text-green-800 text-sm">
-                                <span class="font-semibold">🎉 Livro disponível!</span> Dirija-se à biblioteca para retirar seu livro reservado.
-                            </p>
-                        </div>
-                    </div>
-                    @endif
-                </div>
-                @endforeach
-            </div>
-
-            <!-- Paginação -->
-            <div class="mt-6">
-                {{ $reservas->links() }}
-            </div>
-
-            <!-- Informações -->
-            <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p class="text-blue-800 text-sm">
-                    <span class="font-semibold">💡 Como funciona:</span> Quando você reserva um livro indisponível, você entrará na fila de espera. 
-                    Assim que o livro for devolvido e estiver disponível, sua reserva será confirmada e você será notificado.
-                </p>
-            </div>
-        @else
-            <div class="text-center py-12">
-                <svg class="w-24 h-24 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
-                </svg>
-                <h3 class="text-xl font-semibold text-gray-700 mb-2">Nenhuma reserva encontrada</h3>
-                <p class="text-gray-500 mb-4">Você não possui reservas de livros no momento</p>
-                <a href="{{ route('livros.index') }}" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-semibold">
-                    Explorar Catálogo
-                </a>
-            </div>
-        @endif
+    <!-- Paginação -->
+    <div class="mt-6">
+        {{ $reservas->links() }}
     </div>
 </div>
 @endsection

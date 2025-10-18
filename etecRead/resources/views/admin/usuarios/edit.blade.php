@@ -22,9 +22,38 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('admin.usuarios.update', $usuario->id) }}">
+        <form method="POST" action="{{ route('admin.usuarios.update', $usuario->id) }}" enctype="multipart/form-data">
             @csrf
             @method('PUT')
+
+            <!-- ✅ Preview da Foto -->
+            <div class="mb-6">
+                <label class="block text-gray-700 font-semibold mb-2">Foto de Perfil</label>
+                <div class="flex items-start gap-6">
+                    <div class="flex-shrink-0">
+                        <div id="preview-container" class="w-32 h-32 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
+                            @if($usuario->photo)
+                                <img id="image-preview" src="{{ asset('storage/' . $usuario->photo) }}" alt="Foto" class="w-full h-full object-cover">
+                                <svg id="default-icon" class="w-16 h-16 text-white hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                            @else
+                                <svg id="default-icon" class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <img id="image-preview" src="" alt="Preview" class="w-full h-full object-cover hidden">
+                            @endif
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <input type="file" name="photo" id="photo" accept="image/*"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                               onchange="previewImage(event)">
+                        <p class="text-xs text-gray-500 mt-2">Deixe em branco para manter a foto atual</p>
+                        <p class="text-xs text-gray-500">Formatos aceitos: JPG, PNG, WEBP. Máximo: 2MB</p>
+                    </div>
+                </div>
+            </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
@@ -98,6 +127,23 @@
 </div>
 
 <script>
+    // Preview da imagem
+    function previewImage(event) {
+        const preview = document.getElementById('image-preview');
+        const defaultIcon = document.getElementById('default-icon');
+        const file = event.target.files[0];
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+                defaultIcon.classList.add('hidden');
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+    
     // Mostrar/ocultar campo ano_escolar baseado no role
     const roleSelect = document.getElementById('role');
     const anoEscolarField = document.getElementById('ano-escolar-field');

@@ -63,62 +63,70 @@
     @if($livros->count() > 0)
         <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
             @foreach($livros as $livro)
-            <a href="{{ route('livros.show', $livro->id) }}" 
-               class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1">
-                
-                <!-- Imagem do Livro -->
-                <div class="bg-gradient-to-br from-blue-400 to-purple-500 h-48 flex items-center justify-center">
-                    <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                    </svg>
+<a href="{{ route('livros.show', $livro->id) }}" 
+   class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition transform hover:-translate-y-1">
+    
+    <!-- ✅ Imagem do Livro -->
+    <div class="h-48 flex items-center justify-center overflow-hidden">
+        @if($livro->cover_image)
+            <img src="{{ asset('storage/' . $livro->cover_image) }}" 
+                 alt="{{ $livro->title }}" 
+                 class="w-full h-full object-cover">
+        @else
+            <div class="bg-gradient-to-br from-blue-400 to-purple-500 w-full h-full flex items-center justify-center">
+                <svg class="w-20 h-20 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+            </div>
+        @endif
+    </div>
+
+    <!-- Informações -->
+    <div class="p-4">
+        <h3 class="font-bold text-gray-800 text-lg mb-2 line-clamp-2">{{ $livro->title }}</h3>
+        
+        <div class="space-y-2 text-sm text-gray-600">
+            <p class="flex items-center">
+                <span class="font-semibold mr-2">📁</span>
+                {{ $livro->category->name }}
+            </p>
+            
+            @if($livro->year)
+            <p class="flex items-center">
+                <span class="font-semibold mr-2">📅</span>
+                {{ $livro->year }}
+            </p>
+            @endif
+
+            @if($livro->isbn)
+            <p class="flex items-center text-xs">
+                <span class="font-semibold mr-2">ISBN:</span>
+                {{ $livro->isbn }}
+            </p>
+            @endif
+        </div>
+
+        <!-- Disponibilidade -->
+        <div class="mt-4 pt-4 border-t border-gray-200">
+            @if($livro->available_quantity > 0)
+                <div class="flex items-center justify-between">
+                    <span class="text-green-600 font-semibold">✓ Disponível</span>
+                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                        {{ $livro->available_quantity }} un.
+                    </span>
                 </div>
-
-                <!-- Informações -->
-                <div class="p-4">
-                    <h3 class="font-bold text-gray-800 text-lg mb-2 line-clamp-2">{{ $livro->title }}</h3>
-                    
-                    <div class="space-y-2 text-sm text-gray-600">
-                        <p class="flex items-center">
-                            <span class="font-semibold mr-2">📁</span>
-                            {{ $livro->category->name }}
-                        </p>
-                        
-                        @if($livro->year)
-                        <p class="flex items-center">
-                            <span class="font-semibold mr-2">📅</span>
-                            {{ $livro->year }}
-                        </p>
-                        @endif
-
-                        @if($livro->isbn)
-                        <p class="flex items-center text-xs">
-                            <span class="font-semibold mr-2">ISBN:</span>
-                            {{ $livro->isbn }}
-                        </p>
-                        @endif
-                    </div>
-
-                    <!-- Disponibilidade -->
-                    <div class="mt-4 pt-4 border-t border-gray-200">
-                        @if($livro->available_quantity > 0)
-                            <div class="flex items-center justify-between">
-                                <span class="text-green-600 font-semibold">✓ Disponível</span>
-                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
-                                    {{ $livro->available_quantity }} un.
-                                </span>
-                            </div>
-                        @else
-                            <div class="flex items-center justify-between">
-                                <span class="text-red-600 font-semibold">✗ Indisponível</span>
-                                <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">
-                                    Sem estoque
-                                </span>
-                            </div>
-                        @endif
-                    </div>
+            @else
+                <div class="flex items-center justify-between">
+                    <span class="text-red-600 font-semibold">✗ Indisponível</span>
+                    <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">
+                        Sem estoque
+                    </span>
                 </div>
-            </a>
-            @endforeach
+            @endif
+        </div>
+    </div>
+</a>
+@endforeach
         </div>
 
         <!-- Paginação -->
