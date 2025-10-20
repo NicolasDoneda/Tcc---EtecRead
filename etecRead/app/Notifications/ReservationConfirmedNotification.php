@@ -33,7 +33,7 @@ class ReservationConfirmedNotification extends Notification
                     ->line('O livro **' . $this->reservation->book->title . '** que você reservou está disponível para retirada.')
                     ->line('📌 Detalhes da Reserva:')
                     ->line('• Livro: ' . $this->reservation->book->title)
-                    ->line('• Categoria: ' . $this->reservation->book->category->name)
+                    ->line('• Gênero: ' . $this->reservation->book->category->name)
                     ->line('• Data da Reserva: ' . \Carbon\Carbon::parse($this->reservation->reservation_date)->format('d/m/Y H:i'))
                     ->action('Ver Minhas Reservas', url('/minhas-reservas'))
                     ->line('Por favor, dirija-se à biblioteca para retirar o livro.')

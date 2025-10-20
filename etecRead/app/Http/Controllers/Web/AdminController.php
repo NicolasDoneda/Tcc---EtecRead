@@ -87,14 +87,13 @@ class AdminController extends Controller
             'year' => 'nullable|integer|min:1000|max:' . date('Y'),
             'total_quantity' => 'required|integer|min:0',
             'available_quantity' => 'required|integer|min:0',
-            'cover_image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048', // ✅ NOVO
+            'cover_image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
 
         if ($validated['available_quantity'] > $validated['total_quantity']) {
             return back()->withErrors(['available_quantity' => 'Quantidade disponível não pode ser maior que total.'])->withInput();
         }
 
-        // ✅ Upload da imagem
         if ($request->hasFile('cover_image')) {
             $path = $request->file('cover_image')->store('books', 'public');
             $validated['cover_image'] = $path;
@@ -123,16 +122,14 @@ class AdminController extends Controller
             'year' => 'nullable|integer|min:1000|max:' . date('Y'),
             'total_quantity' => 'required|integer|min:0',
             'available_quantity' => 'required|integer|min:0',
-            'cover_image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048', // ✅ NOVO
+            'cover_image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
 
         if ($validated['available_quantity'] > $validated['total_quantity']) {
             return back()->withErrors(['available_quantity' => 'Quantidade disponível não pode ser maior que total.'])->withInput();
         }
 
-        // ✅ Upload da nova imagem
         if ($request->hasFile('cover_image')) {
-            // Deleta a imagem antiga
             if ($livro->cover_image && Storage::disk('public')->exists($livro->cover_image)) {
                 Storage::disk('public')->delete($livro->cover_image);
             }
@@ -150,7 +147,6 @@ class AdminController extends Controller
     {
         $livro = Book::findOrFail($id);
 
-        // ✅ Deleta a imagem
         if ($livro->cover_image && Storage::disk('public')->exists($livro->cover_image)) {
             Storage::disk('public')->delete($livro->cover_image);
         }
@@ -243,12 +239,11 @@ class AdminController extends Controller
             'rm' => 'nullable|string|unique:users|max:50',
             'role' => 'required|in:aluno,admin',
             'ano_escolar' => 'required_if:role,aluno|nullable|in:1,2,3',
-            'photo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048', // ✅ NOVO
+            'photo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
 
-        // ✅ Upload da foto
         if ($request->hasFile('photo')) {
             $path = $request->file('photo')->store('users', 'public');
             $validated['photo'] = $path;
@@ -276,7 +271,7 @@ class AdminController extends Controller
             'rm' => ['nullable', 'string', 'max:50', Rule::unique('users')->ignore($id)],
             'role' => 'required|in:aluno,admin',
             'ano_escolar' => 'nullable|in:1,2,3',
-            'photo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048', // ✅ NOVO
+            'photo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
 
         if (!empty($validated['password'])) {
@@ -285,9 +280,7 @@ class AdminController extends Controller
             unset($validated['password']);
         }
 
-        // ✅ Upload da nova foto
         if ($request->hasFile('photo')) {
-            // Deleta a foto antiga
             if ($usuario->photo && Storage::disk('public')->exists($usuario->photo)) {
                 Storage::disk('public')->delete($usuario->photo);
             }
@@ -305,7 +298,6 @@ class AdminController extends Controller
     {
         $usuario = User::findOrFail($id);
 
-        // ✅ Deleta a foto
         if ($usuario->photo && Storage::disk('public')->exists($usuario->photo)) {
             Storage::disk('public')->delete($usuario->photo);
         }
@@ -364,7 +356,6 @@ class AdminController extends Controller
         return view('admin.emprestimos.edit', compact('emprestimo'));
     }
 
-    // Método updateLoan
     public function updateLoan(Request $request, $id)
     {
         $emprestimo = Loan::findOrFail($id);
@@ -386,10 +377,14 @@ class AdminController extends Controller
                 ->first();
 
             if ($proximaReserva) {
-                $proximaReserva->update(['status' => 'confirmada']);
+                $proximaReserva->update(['status' => 'confirmado']); // ✅ CORRIGIDO
 
                 // ✅ ENVIA EMAIL!
-                $proximaReserva->user->notify(new ReservationConfirmedNotification($proximaReserva));
+                try {
+                    $proximaReserva->user->notify(new ReservationConfirmedNotification($proximaReserva));
+                } catch (\Exception $e) {
+                    \Log::error('Erro ao enviar email de reserva: ' . $e->getMessage());
+                }
             }
         }
 
@@ -410,6 +405,7 @@ class AdminController extends Controller
 
         return redirect()->route('admin.emprestimos.index')->with('success', 'Empréstimo deletado com sucesso!');
     }
+
     // ============= RESERVAS =============
     public function reservations(Request $request)
     {
@@ -436,8 +432,8 @@ class AdminController extends Controller
             return back()->withErrors(['error' => 'Livro sem estoque disponível.']);
         }
 
-        // Confirma a reserva
-        $reserva->update(['status' => 'confirmada']);
+        // ✅ Confirma a reserva (CORRIGIDO: confirmado em vez de confirmada)
+        $reserva->update(['status' => 'confirmado']);
 
         // ✅ ENVIA EMAIL!
         try {
@@ -452,7 +448,8 @@ class AdminController extends Controller
     {
         $reserva = Reservation::findOrFail($id);
 
-        $reserva->update(['status' => 'cancelada']);
+        // ✅ CORRIGIDO: cancelado em vez de cancelada
+        $reserva->update(['status' => 'cancelado']);
 
         return back()->with('success', 'Reserva cancelada com sucesso!');
     }
