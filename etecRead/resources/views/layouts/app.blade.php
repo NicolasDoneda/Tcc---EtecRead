@@ -15,12 +15,14 @@
         <nav class="bg-white shadow-lg">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="flex justify-between h-16">
+                    <!-- Logo e Links de Navegação -->
                     <div class="flex items-center space-x-8">
                         <a href="{{ auth()->user()->role === 'admin' ? route('admin.dashboard') : route('dashboard') }}"
                             class="text-xl font-bold text-blue-600">
                             📚 Biblioteca
                         </a>
 
+                        <!-- Links para ALUNOS -->
                         @if(auth()->user()->role === 'aluno')
                             <a href="{{ route('dashboard') }}"
                                 class="text-gray-700 hover:text-blue-600 {{ request()->routeIs('dashboard') ? 'text-blue-600 font-semibold' : '' }}">
@@ -40,6 +42,7 @@
                             </a>
                         @endif
 
+                        <!-- Links para ADMINS -->
                         @if(auth()->user()->role === 'admin')
                             <a href="{{ route('admin.dashboard') }}"
                                 class="text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.dashboard') ? 'text-blue-600 font-semibold' : '' }}">
@@ -61,7 +64,6 @@
                                 class="text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.emprestimos.*') ? 'text-blue-600 font-semibold' : '' }}">
                                 Empréstimos
                             </a>
-                            <!-- ✅ NOVO -->
                             <a href="{{ route('admin.reservas.index') }}"
                                 class="text-gray-700 hover:text-blue-600 {{ request()->routeIs('admin.reservas.*') ? 'text-blue-600 font-semibold' : '' }}">
                                 Reservas
@@ -69,39 +71,36 @@
                         @endif
                     </div>
 
-                    <div class="flex items-center space-x-4">
-                        <div class="flex items-center space-x-3">
-                            <!-- Foto do usuário (clicável) -->
-                            <a href="{{ route('perfil.show') }}"
-                                class="flex items-center space-x-3 hover:opacity-80 transition">
-                                @if(auth()->user()->photo)
-                                    <img src="{{ asset('storage/' . auth()->user()->photo) }}" alt="{{ auth()->user()->name }}"
-                                        class="w-10 h-10 rounded-full object-cover border-2 border-blue-500">
-                                @else
-                                    <div
-                                        class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center">
-                                        <span
-                                            class="text-white font-bold text-lg">{{ substr(auth()->user()->name, 0, 1) }}</span>
-                                    </div>
-                                @endif
-
-                                <div class="text-right">
-                                    <p class="text-sm text-gray-500">Bem-vindo,</p>
-                                    <p class="text-gray-700 font-semibold">{{ auth()->user()->name }}</p>
-                                </div>
+                    <!-- Área do Usuário (Direita) -->
+                    <div class="flex items-center space-x-3">
+                        <!-- Botão Criar Usuário (APENAS ADMIN) -->
+                        @if(auth()->user()->role === 'admin')
+                            <a href="{{ route('admin.usuarios.create') }}"
+                                class="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 transition text-sm font-medium">
+                                + Novo Usuário
                             </a>
-                        </div>
+                        @endif
 
-                        <!-- Botão Perfil -->
+                        <!-- Foto e Nome do Usuário -->
                         <a href="{{ route('perfil.show') }}"
-                            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
-                            👤 Perfil
+                            class="flex items-center space-x-2 hover:opacity-80 transition">
+                            @if(auth()->user()->photo)
+                                <img src="{{ asset('storage/' . auth()->user()->photo) }}" 
+                                    alt="{{ auth()->user()->name }}"
+                                    class="w-9 h-9 rounded-full object-cover border-2 border-blue-500">
+                            @else
+                                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center">
+                                    <span class="text-white font-bold">{{ substr(auth()->user()->name, 0, 1) }}</span>
+                                </div>
+                            @endif
+                            <span class="text-gray-700 font-medium text-sm">{{ auth()->user()->name }}</span>
                         </a>
 
-                        <form method="POST" action="{{ route('logout') }}">
+                        <!-- Botão Sair -->
+                        <form method="POST" action="{{ route('logout') }}" class="m-0">
                             @csrf
                             <button type="submit"
-                                class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
+                                class="bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition text-sm font-medium">
                                 Sair
                             </button>
                         </form>

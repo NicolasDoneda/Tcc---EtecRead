@@ -17,11 +17,9 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Auth
+// Auth - APENAS LOGIN (registro removido)
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 /*
@@ -77,7 +75,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/categorias/{id}', [AdminController::class, 'updateCategory'])->name('categorias.update');
     Route::delete('/categorias/{id}', [AdminController::class, 'destroyCategory'])->name('categorias.destroy');
     
-    // Usuários
+    // Usuários (AGORA APENAS ADMIN PODE CRIAR)
     Route::get('/usuarios', [AdminController::class, 'users'])->name('usuarios.index');
     Route::get('/usuarios/criar', [AdminController::class, 'createUser'])->name('usuarios.create');
     Route::post('/usuarios', [AdminController::class, 'storeUser'])->name('usuarios.store');

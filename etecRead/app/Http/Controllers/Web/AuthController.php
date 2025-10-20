@@ -3,21 +3,30 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    /**
+     * Exibe a tela de login
+     */
     public function showLogin()
     {
         if (auth()->check()) {
+            // Redireciona baseado na role
+            if (auth()->user()->role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            }
             return redirect()->route('dashboard');
         }
+        
         return view('auth.login');
     }
 
+    /**
+     * Processa o login
+     */
     public function login(Request $request)
     {
         $credentials = $request->validate([
@@ -41,38 +50,9 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    public function showRegister()
-    {
-        if (auth()->check()) {
-            return redirect()->route('dashboard');
-        }
-        return view('auth.register');
-    }
-
-    public function register(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-            'rm' => 'nullable|string|unique:users|max:50',
-            'ano_escolar' => 'required|in:1,2,3',
-        ]);
-
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'rm' => $validated['rm'],
-            'password' => Hash::make($validated['password']),
-            'role' => 'aluno',
-            'ano_escolar' => $validated['ano_escolar'],
-        ]);
-
-        Auth::login($user);
-
-        return redirect()->route('dashboard')->with('success', 'Cadastro realizado com sucesso!');
-    }
-
+    /**
+     * Processa o logout
+     */
     public function logout(Request $request)
     {
         Auth::logout();
