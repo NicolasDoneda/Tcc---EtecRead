@@ -5,7 +5,7 @@
 @section('content')
 <div class="max-w-4xl mx-auto px-4">
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">👤 Meu Perfil</h1>
+        <h1 class="text-3xl font-bold text-gray-800"> Meu Perfil</h1>
         <p class="text-gray-600 mt-2">Visualize e edite suas informações pessoais</p>
     </div>
 
@@ -37,11 +37,11 @@
                         <p class="text-xs text-gray-500 uppercase font-semibold">Tipo de Conta</p>
                         @if($user->role === 'admin')
                             <p class="text-purple-600 font-bold flex items-center mt-1">
-                                <span class="bg-purple-100 px-3 py-1 rounded-full">👑 Administrador</span>
+                                <span class="bg-purple-100 px-3 py-1 rounded-full">Administrador</span>
                             </p>
                         @else
                             <p class="text-blue-600 font-bold flex items-center mt-1">
-                                <span class="bg-blue-100 px-3 py-1 rounded-full">🎓 Aluno</span>
+                                <span class="bg-blue-100 px-3 py-1 rounded-full">Aluno</span>
                             </p>
                         @endif
                     </div>
@@ -69,7 +69,7 @@
                 @if($user->role === 'aluno')
                 <!-- Estatísticas do Aluno -->
                 <div class="mt-6 pt-6 border-t border-gray-200">
-                    <h3 class="text-sm font-bold text-gray-700 mb-3">📊 Minhas Estatísticas</h3>
+                    <h3 class="text-sm font-bold text-gray-700 mb-3">Minhas Estatísticas</h3>
                     <div class="space-y-2">
                         <div class="flex justify-between items-center">
                             <span class="text-xs text-gray-600">Empréstimos Ativos:</span>
@@ -98,7 +98,7 @@
         <!-- Coluna Direita - Formulário de Edição -->
         <div class="lg:col-span-2">
             <div class="bg-white rounded-lg shadow-lg p-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-6">✏️ Editar Informações</h2>
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Editar Informações</h2>
 
                 @if(session('success'))
                     <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
@@ -122,7 +122,7 @@
 
                     <!-- Foto de Perfil -->
                     <div class="mb-6">
-                        <label class="block text-gray-700 font-semibold mb-2">📷 Foto de Perfil</label>
+                        <label class="block text-gray-700 font-semibold mb-2">Foto de Perfil</label>
                         <div class="flex items-center gap-4">
                             <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-gray-300">
                                 @if($user->photo)
@@ -183,7 +183,7 @@
                     <!-- Informações Somente Leitura -->
                     @if($user->rm || $user->ano_escolar || $user->role)
                     <div class="mt-6 pt-6 border-t border-gray-200">
-                        <h3 class="text-sm font-bold text-gray-700 mb-3">ℹ️ Informações Protegidas</h3>
+                        <h3 class="text-sm font-bold text-gray-700 mb-3">Informações Protegidas</h3>
                         <p class="text-xs text-gray-600 mb-4">Estes dados não podem ser alterados por você. Entre em contato com a administração se precisar modificá-los.</p>
                         
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -211,7 +211,7 @@
 
                     <div class="mt-8 flex gap-4">
                         <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-semibold">
-                            💾 Salvar Alterações
+                            Salvar Alterações
                         </button>
                         <a href="{{ route('dashboard') }}" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition font-semibold">
                             Cancelar

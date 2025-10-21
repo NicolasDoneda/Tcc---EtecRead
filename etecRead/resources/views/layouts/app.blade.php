@@ -19,7 +19,7 @@
                     <div class="flex items-center space-x-8">
                         <a href="{{ auth()->user()->role === 'admin' ? route('admin.dashboard') : route('dashboard') }}"
                             class="text-xl font-bold text-blue-600">
-                            📚 Biblioteca
+                            Biblioteca
                         </a>
 
                         <!-- Links para ALUNOS -->

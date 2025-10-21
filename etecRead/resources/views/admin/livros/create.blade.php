@@ -8,7 +8,7 @@
             <a href="{{ route('admin.livros.index') }}" class="text-blue-600 hover:underline mb-4 inline-block">
                 ← Voltar para lista
             </a>
-            <h1 class="text-3xl font-bold text-gray-800">📚 Adicionar Novo Livro</h1>
+            <h1 class="text-3xl font-bold text-gray-800">Adicionar Novo Livro</h1>
         </div>
 
         <div class="bg-white rounded-lg shadow-lg p-8">

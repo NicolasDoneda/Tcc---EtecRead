@@ -31,11 +31,11 @@ class LoanController extends Controller
                 'status' => 'nullable|in:ativo,finalizado',
                 'reservation_id' => 'nullable|exists:reservations,id',
             ]);
-            
-            Log::info('✅ PASSOU NA VALIDAÇÃO!');
-            
+
+            Log::info('passou na validação');
+
         } catch (ValidationException $e) {
-            Log::error('❌ ERRO DE VALIDAÇÃO:', $e->errors());
+            Log::error('erro de validação:', $e->errors());
             throw $e;
         }
 
@@ -80,7 +80,7 @@ class LoanController extends Controller
         }
 
         // Remove campos null
-        $data = array_filter($validated, function($value) {
+        $data = array_filter($validated, function ($value) {
             return $value !== null;
         });
 
@@ -94,16 +94,16 @@ class LoanController extends Controller
         try {
             // Cria o empréstimo
             $loan = Loan::create($data);
-            
+
             // Diminui o estoque do livro
             $book->decreaseStock();
-            
-            Log::info('✅ LOAN CRIADO!', ['id' => $loan->id]);
-            
+
+            Log::info('loan criado!', ['id' => $loan->id]);
+
             return response()->json($loan->load(['user', 'book', 'reservation']), 201);
-            
+
         } catch (\Exception $e) {
-            Log::error('❌ ERRO AO CRIAR LOAN');
+            Log::error('erro ao criar loan');
             Log::error('Mensagem: ' . $e->getMessage());
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -118,7 +118,7 @@ class LoanController extends Controller
     public function update(Request $request, $id)
     {
         Log::info('=== INÍCIO UPDATE LOAN ===');
-        
+
         $loan = Loan::findOrFail($id);
         Log::info('Loan encontrado:', $loan->toArray());
 
@@ -131,36 +131,36 @@ class LoanController extends Controller
                 'status' => 'sometimes|in:ativo,finalizado',
                 'reservation_id' => 'nullable|exists:reservations,id',
             ]);
-            
-            Log::info('✅ PASSOU NA VALIDAÇÃO UPDATE!');
-            
+
+            Log::info('passou na validação update');
+
         } catch (ValidationException $e) {
-            Log::error('❌ ERRO DE VALIDAÇÃO UPDATE:', $e->errors());
+            Log::error('erro na validação update:', $e->errors());
             throw $e;
         }
 
-        $data = array_filter($validated, function($value) {
+        $data = array_filter($validated, function ($value) {
             return $value !== null;
         });
 
         // Se mudou o status para finalizado e estava ativo, aumenta estoque
         if (isset($data['status']) && $data['status'] === 'finalizado' && $loan->status === 'ativo') {
             $data['return_date'] = $data['return_date'] ?? Carbon::now();
-            
+
             // Aumenta o estoque do livro
             $loan->book->increaseStock();
-            
+
             Log::info('Empréstimo finalizado, estoque aumentado');
         }
 
         try {
             $loan->update($data);
-            Log::info('✅ LOAN ATUALIZADO!', $loan->toArray());
-            
+            Log::info('loan atualizado', $loan->toArray());
+
             return response()->json($loan->load(['user', 'book', 'reservation']));
-            
+
         } catch (\Exception $e) {
-            Log::error('❌ ERRO AO ATUALIZAR:', $e->getMessage());
+            Log::error('erro au atualizar', $e->getMessage());
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -168,12 +168,12 @@ class LoanController extends Controller
     public function destroy($id)
     {
         $loan = Loan::findOrFail($id);
-        
+
         // Se o empréstimo está ativo, devolve o estoque
         if ($loan->status === 'ativo') {
             $loan->book->increaseStock();
         }
-        
+
         $loan->delete();
 
         return response()->json(['message' => 'Empréstimo deletado com sucesso'], 200);

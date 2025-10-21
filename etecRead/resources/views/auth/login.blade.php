@@ -6,7 +6,7 @@
     <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
         <div class="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
             <div class="text-center mb-6">
-                <h1 class="text-4xl font-bold text-gray-800">📚</h1>
+                <h1 class="text-4xl font-bold text-gray-800"></h1>
                 <h2 class="text-2xl font-bold text-gray-800 mt-2">Biblioteca Escolar</h2>
                 <p class="text-gray-600 mt-1">Faça login para continuar</p>
             </div>

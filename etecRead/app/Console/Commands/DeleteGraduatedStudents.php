@@ -32,12 +32,12 @@ class DeleteGraduatedStudents extends Command
             }
 
             Log::info("Alunos formandos deletados: {$count}");
-            $this->info("✅ Total de alunos deletados: {$count}");
+            $this->info("Total de alunos deletados: {$count}");
             
             return Command::SUCCESS;
         }
         
-        $this->info("⏳ Ainda não é período de exclusão (após 20/12)");
+        $this->info("Ainda não é período de exclusão (após 20/12)");
         return Command::SUCCESS;
     }
 }

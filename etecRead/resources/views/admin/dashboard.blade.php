@@ -5,7 +5,7 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4">
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">📊 Dashboard Administrativo</h1>
+        <h1 class="text-3xl font-bold text-gray-800">Dashboard Administrativo</h1>
         <p class="text-gray-600 mt-2">Visão geral do sistema de biblioteca</p>
     </div>
 
@@ -109,7 +109,7 @@
         <!-- Alunos por Ano Escolar -->
         <div class="bg-white rounded-lg shadow-lg p-6">
             <h2 class="text-xl font-bold mb-6 flex items-center">
-                🎓 Alunos por Ano Escolar
+                Alunos por Ano Escolar
             </h2>
             <div class="space-y-4">
                 @forelse($alunosPorAno as $ano)
@@ -133,7 +133,7 @@
         <!-- Livros Mais Emprestados -->
         <div class="bg-white rounded-lg shadow-lg p-6">
             <h2 class="text-xl font-bold mb-6 flex items-center">
-                🏆 Top 5 Livros Mais Emprestados
+                Top 5 Livros Mais Emprestados
             </h2>
             <div class="space-y-4">
                 @forelse($livrosMaisEmprestados as $index => $livro)
@@ -162,7 +162,7 @@
     @if($emprestimosAtrasados->count() > 0)
     <div class="bg-red-50 border-2 border-red-300 rounded-lg shadow-lg p-6 mb-8">
         <h2 class="text-xl font-bold text-red-800 mb-6 flex items-center">
-            ⚠️ Empréstimos Atrasados ({{ $emprestimosAtrasados->count() }})
+            Empréstimos Atrasados ({{ $emprestimosAtrasados->count() }})
         </h2>
         <div class="overflow-x-auto">
             <table class="min-w-full bg-white rounded-lg overflow-hidden">
@@ -203,7 +203,7 @@
     <!-- Empréstimos Recentes -->
     <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
         <h2 class="text-xl font-bold mb-6 flex items-center">
-            📅 Empréstimos Recentes
+        Empréstimos Recentes
         </h2>
         <div class="overflow-x-auto">
             <table class="min-w-full">
@@ -262,7 +262,7 @@
         
         <!-- Promover Alunos -->
         <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
-            <h3 class="text-xl font-bold mb-3">🎓 Promover Alunos</h3>
+            <h3 class="text-xl font-bold mb-3">Promover Alunos</h3>
             <p class="text-blue-100 mb-4 text-sm">
                 Promove todos os alunos para o próximo ano escolar (1º→2º, 2º→3º)
             </p>
@@ -276,7 +276,7 @@
 
         <!-- Deletar Formandos -->
         <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-lg shadow-lg p-6 text-white">
-            <h3 class="text-xl font-bold mb-3">🗑️ Deletar Formandos</h3>
+            <h3 class="text-xl font-bold mb-3">Deletar Formandos</h3>
             <p class="text-red-100 mb-4 text-sm">
                 Remove todos os alunos do 3º ano do sistema (executar após formatura)
             </p>

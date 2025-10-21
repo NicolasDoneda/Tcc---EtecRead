@@ -6,7 +6,7 @@
 <div class="max-w-7xl mx-auto px-4">
     <div class="flex justify-between items-center mb-8">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">📁 Gerenciar Categorias</h1>
+            <h1 class="text-3xl font-bold text-gray-800">Gerenciar Categorias</h1>
             <p class="text-gray-600 mt-2">Organize o catálogo por categorias</p>
         </div>
         <a href="{{ route('admin.categorias.create') }}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-semibold">

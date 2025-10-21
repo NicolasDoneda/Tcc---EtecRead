@@ -6,7 +6,7 @@
 <div class="max-w-7xl mx-auto px-4">
     <div class="flex justify-between items-center mb-8">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">📌 Gerenciar Reservas</h1>
+            <h1 class="text-3xl font-bold text-gray-800">Gerenciar Reservas</h1>
             <p class="text-gray-600 mt-2">Controle as reservas de livros dos alunos</p>
         </div>
     </div>
@@ -21,7 +21,7 @@
                 <option value="cancelada" {{ request('status') == 'cancelada' ? 'selected' : '' }}>Canceladas</option>
             </select>
             <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-semibold">
-                🔍 Filtrar
+                Filtrar
             </button>
             @if(request('status'))
             <a href="{{ route('admin.reservas.index') }}" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition font-semibold">
@@ -60,7 +60,7 @@
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Data Reserva</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Disponível</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Ações</th>
+                    
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -95,7 +95,7 @@
                     <td class="px-6 py-4">
                         @if($reserva->status === 'pendente')
                             <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">
-                                ⏳ Pendente
+                                Pendente
                             </span>
                         @elseif($reserva->status === 'confirmada')
                             <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
@@ -107,32 +107,7 @@
                             </span>
                         @endif
                     </td>
-                    <td class="px-6 py-4">
-                        <div class="flex gap-2">
-                            @if($reserva->status === 'pendente' && $reserva->book->available_quantity > 0)
-                                <form method="POST" action="{{ route('admin.reservas.confirmar', $reserva->id) }}" class="inline">
-                                    @csrf
-                                    <button type="submit" 
-                                            class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm font-semibold"
-                                            onclick="return confirm('Confirmar reserva e enviar email para o aluno?')">
-                                        ✓ Confirmar
-                                    </button>
-                                </form>
-                            @endif
-                            
-                            @if($reserva->status === 'pendente')
-                                <form method="POST" action="{{ route('admin.reservas.cancelar', $reserva->id) }}" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" 
-                                            class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm font-semibold"
-                                            onclick="return confirm('Cancelar esta reserva?')">
-                                        ✗ Cancelar
-                                    </button>
-                                </form>
-                            @endif
-                        </div>
-                    </td>
+                    
                 </tr>
                 @empty
                 <tr>

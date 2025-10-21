@@ -32,7 +32,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
         
-        // ✅ ADICIONE ISSO: Registrar alias do middleware admin
+        // Registrar alias do middleware admin
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);

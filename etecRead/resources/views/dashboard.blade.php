@@ -5,7 +5,7 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4">
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">Olá, {{ auth()->user()->name }}! 👋</h1>
+        <h1 class="text-3xl font-bold text-gray-800">Olá, {{ auth()->user()->name }}!</h1>
         <p class="text-gray-600 mt-2">Bem-vindo ao sistema de biblioteca</p>
     </div>
 
@@ -84,7 +84,7 @@
         <!-- Meus Empréstimos Ativos -->
         <div class="bg-white rounded-lg shadow-lg p-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-bold text-gray-800">📖 Meus Empréstimos Ativos</h2>
+                <h2 class="text-xl font-bold text-gray-800">Meus Empréstimos Ativos</h2>
                 <a href="{{ route('emprestimos.meus') }}" class="text-blue-600 hover:underline text-sm">Ver todos</a>
             </div>
 
@@ -141,7 +141,7 @@
         <!-- Livros Disponíveis Recentes -->
         <div class="bg-white rounded-lg shadow-lg p-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-bold text-gray-800">📚 Livros Disponíveis</h2>
+                <h2 class="text-xl font-bold text-gray-800">Livros Disponíveis</h2>
                 <a href="{{ route('livros.index') }}" class="text-blue-600 hover:underline text-sm">Ver todos</a>
             </div>
             

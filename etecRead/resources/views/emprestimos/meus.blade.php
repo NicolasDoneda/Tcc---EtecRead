@@ -5,7 +5,7 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4">
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">📖 Meus Empréstimos</h1>
+        <h1 class="text-3xl font-bold text-gray-800">Meus Empréstimos</h1>
         <p class="text-gray-600 mt-2">Acompanhe seus livros emprestados</p>
     </div>
 
@@ -65,7 +65,7 @@
                         <div class="text-right">
                             @if($isOverdue)
                                 <div class="bg-red-100 border border-red-300 rounded-lg px-4 py-2 mb-2">
-                                    <p class="text-red-800 font-bold text-lg">⚠️ ATRASADO</p>
+                                    <p class="text-red-800 font-bold text-lg">ATRASADO</p>
                                     <p class="text-red-600 text-sm">{{ abs($daysLeft) }} dias de atraso</p>
                                 </div>
                                 <p class="text-xs text-red-600 mt-2">
@@ -88,7 +88,7 @@
             <!-- Aviso -->
             <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <p class="text-blue-800 text-sm">
-                    <span class="font-semibold">💡 Lembre-se:</span> Você pode ter no máximo 3 empréstimos ativos simultaneamente. 
+                    <span class="font-semibold">Lembre-se:</span> Você pode ter no máximo 3 empréstimos ativos simultaneamente. 
                     Para emprestar novos livros, devolva os atuais à biblioteca.
                 </p>
             </div>
@@ -108,7 +108,7 @@
 
     <!-- Histórico de Empréstimos -->
     <div class="bg-white rounded-lg shadow-lg p-6">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">📚 Histórico de Empréstimos</h2>
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Histórico de Empréstimos</h2>
 
         @if($emprestimosFinalizados->count() > 0)
             <div class="overflow-x-auto">

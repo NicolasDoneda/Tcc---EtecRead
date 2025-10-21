@@ -37,7 +37,7 @@
 
                 <!-- Card de Disponibilidade -->
                 <div class="mt-6 bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="font-bold text-gray-800 mb-4">📊 Disponibilidade</h3>
+                    <h3 class="font-bold text-gray-800 mb-4">Disponibilidade</h3>
 
                     <div class="space-y-3">
                         <div class="flex justify-between items-center">
@@ -90,7 +90,7 @@
                                 @if(auth()->check() && auth()->user()->role === 'aluno')
                                     @if($jaReservou)
                                         <div class="mt-3 bg-yellow-100 border border-yellow-300 rounded-lg p-3">
-                                            <p class="text-yellow-800 text-sm font-semibold">⏳ Você já tem uma reserva pendente deste
+                                            <p class="text-yellow-800 text-sm font-semibold">Você já tem uma reserva pendente deste
                                                 livro</p>
                                         </div>
                                     @else
@@ -127,13 +127,13 @@
                         <div class="grid grid-cols-2 gap-4 mb-6 pb-6 border-b border-gray-200">
                             <div>
                                 <p class="text-sm text-gray-500">Categoria</p>
-                                <p class="font-semibold text-gray-800">📁 {{ $livro->category->name }}</p>
+        
                             </div>
 
                             @if($livro->year)
                                 <div>
                                     <p class="text-sm text-gray-500">Ano de Publicação</p>
-                                    <p class="font-semibold text-gray-800">📅 {{ $livro->year }}</p>
+                                    
                                 </div>
                             @endif
 
@@ -158,7 +158,7 @@
 
                         <!-- Informações Adicionais -->
                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                            <h3 class="font-bold text-blue-800 mb-3">ℹ️ Informações Importantes</h3>
+                            <h3 class="font-bold text-blue-800 mb-3">Informações Importantes</h3>
                             <ul class="space-y-2 text-blue-700 text-sm">
                                 <li class="flex items-start">
                                     <span class="mr-2">•</span>

@@ -27,18 +27,18 @@ class ReservationConfirmedNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-                    ->subject('📚 Sua Reserva está Disponível!')
-                    ->greeting('Olá, ' . $notifiable->name . '! 👋')
+                    ->subject('Sua Reserva está Disponível!')
+                    ->greeting('Olá, ' . $notifiable->name . '!')
                     ->line('Temos uma ótima notícia para você!')
                     ->line('O livro **' . $this->reservation->book->title . '** que você reservou está disponível para retirada.')
-                    ->line('📌 Detalhes da Reserva:')
+                    ->line('Detalhes da Reserva:')
                     ->line('• Livro: ' . $this->reservation->book->title)
                     ->line('• Gênero: ' . $this->reservation->book->category->name)
                     ->line('• Data da Reserva: ' . \Carbon\Carbon::parse($this->reservation->reservation_date)->format('d/m/Y H:i'))
                     ->action('Ver Minhas Reservas', url('/minhas-reservas'))
                     ->line('Por favor, dirija-se à biblioteca para retirar o livro.')
                     ->line('⚠️ **Atenção:** Reserve sua cópia o quanto antes!')
-                    ->salutation('Atenciosamente, Equipe da Biblioteca Escolar 📖');
+                    ->salutation('Atenciosamente, Equipe da Biblioteca Escolar');
     }
 
     public function toArray(object $notifiable): array

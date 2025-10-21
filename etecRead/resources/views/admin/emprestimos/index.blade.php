@@ -6,7 +6,7 @@
 <div class="max-w-7xl mx-auto px-4">
     <div class="flex justify-between items-center mb-8">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">📖 Gerenciar Empréstimos</h1>
+            <h1 class="text-3xl font-bold text-gray-800">Gerenciar Empréstimos</h1>
             <p class="text-gray-600 mt-2">Controle todos os empréstimos da biblioteca</p>
         </div>
         <a href="{{ route('admin.emprestimos.create') }}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-semibold">
@@ -23,7 +23,7 @@
                 <option value="finalizado" {{ request('status') == 'finalizado' ? 'selected' : '' }}>Finalizados</option>
             </select>
             <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-semibold">
-                🔍 Filtrar
+                Filtrar
             </button>
             @if(request('status'))
             <a href="{{ route('admin.emprestimos.index') }}" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition font-semibold">
@@ -77,7 +77,7 @@
                         @if($emprestimo->status === 'ativo')
                             @if($isOverdue)
                                 <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold">
-                                    ⚠️ Atrasado
+                                    ● Atrasado
                                 </span>
                             @else
                                 <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">

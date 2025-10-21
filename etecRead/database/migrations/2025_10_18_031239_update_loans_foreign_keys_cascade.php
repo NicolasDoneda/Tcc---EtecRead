@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreign('user_id')
                   ->references('id')
                   ->on('users')
-                  ->onDelete('cascade'); // ✅ Quando deletar user, deleta empréstimos
+                  ->onDelete('cascade'); // Quando deletar user, deleta empréstimos
         });
 
         Schema::table('reservations', function (Blueprint $table) {
@@ -27,7 +27,7 @@ return new class extends Migration
             $table->foreign('user_id')
                   ->references('id')
                   ->on('users')
-                  ->onDelete('cascade'); // ✅ Quando deletar user, deleta reservas
+                  ->onDelete('cascade'); //Quando deletar user, deleta reservas
         });
     }
 

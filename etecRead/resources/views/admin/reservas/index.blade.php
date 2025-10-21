@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">📌 Gerenciar Reservas</h1>
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Gerenciar Reservas</h1>
 
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <table class="min-w-full">
@@ -31,7 +31,7 @@
                     <td class="px-6 py-4">
                         @if($reserva->status === 'pendente')
                             <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">
-                                ⏳ Pendente
+                                Pendente
                             </span>
                         @elseif($reserva->status === 'confirmada')
                             <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">

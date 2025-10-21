@@ -6,7 +6,7 @@
 <div class="max-w-7xl mx-auto px-4">
     <div class="flex justify-between items-center mb-8">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">📚 Gerenciar Livros</h1>
+            <h1 class="text-3xl font-bold text-gray-800">Gerenciar Livros</h1>
             <p class="text-gray-600 mt-2">Administre o catálogo da biblioteca</p>
         </div>
         <a href="{{ route('admin.livros.create') }}"
@@ -22,7 +22,7 @@
                 class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
             <button type="submit"
                 class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-semibold">
-                🔍 Buscar
+                Buscar
             </button>
             @if(request('search'))
                 <a href="{{ route('admin.livros.index') }}"
@@ -101,7 +101,7 @@
                     <div class="flex gap-2">
                         <a href="{{ route('admin.livros.edit', $livro->id) }}" 
                            class="flex-1 bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600 text-sm text-center font-semibold">
-                            ✏️ Editar
+                            Editar
                         </a>
                         <form method="POST" action="{{ route('admin.livros.destroy', $livro->id) }}" 
                               onsubmit="return confirm('Tem certeza que deseja deletar este livro?')"
@@ -110,7 +110,7 @@
                             @method('DELETE')
                             <button type="submit" 
                                     class="w-full bg-red-500 text-white px-3 py-2 rounded hover:bg-red-600 text-sm font-semibold">
-                                🗑️ Deletar
+                                Deletar
                             </button>
                         </form>
                     </div>

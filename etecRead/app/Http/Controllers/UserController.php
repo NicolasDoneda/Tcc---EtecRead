@@ -13,13 +13,13 @@ class UserController extends Controller
     public function index()
     {
         $users = User::all();
-        
+
         // Adiciona URL da imagem na resposta
-        $users->map(function($user) {
+        $users->map(function ($user) {
             $user->photo_url = $user->photo_url;
             return $user;
         });
-        
+
         return $users;
     }
 
@@ -36,13 +36,13 @@ class UserController extends Controller
         ]);
 
         $data['password'] = Hash::make($data['password']);
-        
+
         // Upload da imagem
         if ($request->hasFile('photo')) {
             $path = $request->file('photo')->store('users', 'public');
             $data['photo'] = $path;
         }
-        
+
         $user = User::create($data);
 
         return response()->json($user, 201);
@@ -79,7 +79,7 @@ class UserController extends Controller
             'photo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
 
-        // ✅ Só atualiza a senha se foi enviada
+        // Só atualiza a senha se foi enviada
         if (!empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         } else {
@@ -92,7 +92,7 @@ class UserController extends Controller
             if ($user->photo && Storage::disk('public')->exists($user->photo)) {
                 Storage::disk('public')->delete($user->photo);
             }
-            
+
             $path = $request->file('photo')->store('users', 'public');
             $data['photo'] = $path;
         }
@@ -105,12 +105,12 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::findOrFail($id);
-        
+
         // Deleta a imagem
         if ($user->photo && Storage::disk('public')->exists($user->photo)) {
             Storage::disk('public')->delete($user->photo);
         }
-        
+
         $user->delete();
 
         return response()->json(['message' => 'Usuário deletado com sucesso'], 200);
