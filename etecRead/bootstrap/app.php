@@ -17,10 +17,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
         // Configuração do grupo API
         $middleware->api(append: [
             EnsureFrontendRequestsAreStateful::class,
-            'throttle:api', // limitar requisições
+            'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
-        
         
         // Configuração do grupo WEB
         $middleware->web(append: [
@@ -32,9 +31,9 @@ $app = Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
         
-        // Registrar alias do middleware admin
+        // Registrar alias de middlewares customizados
         $middleware->alias([
-            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'admin' => \App\Http\Middleware\IsAdmin::class, 
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -42,7 +41,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })
     ->create();
 
-// Registrar facades para funcionar com Tinker e outras facades
+// Registrar facades
 Facade::setFacadeApplication($app);
 
 return $app;
