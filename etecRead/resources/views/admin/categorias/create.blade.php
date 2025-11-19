@@ -3,45 +3,92 @@
 @section('title', 'Adicionar Categoria')
 
 @section('content')
-<div class="max-w-2xl mx-auto px-4">
+<div class="max-w-3xl mx-auto px-4">
+    <!-- Header -->
     <div class="mb-8">
-        <a href="{{ route('admin.categorias.index') }}" class="text-blue-600 hover:underline mb-4 inline-block">
-            ← Voltar para lista
-        </a>
-        <h1 class="text-3xl font-bold text-gray-800">Adicionar Nova Categoria</h1>
+        <div class="flex items-center mb-4">
+            <a href="{{ route('admin.categorias.index') }}" class="text-gray-600 hover:text-gray-900 mr-4">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+            </a>
+            <div>
+                <h1 class="text-4xl font-bold text-gray-900">Adicionar Categoria</h1>
+                <p class="text-gray-600 mt-1">Preencha as informações da nova categoria</p>
+            </div>
+        </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow-lg p-8">
-        @if($errors->any())
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                <ul class="list-disc list-inside">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+    <!-- Erros -->
+    @if($errors->any())
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg mb-6">
+            <div class="flex items-start">
+                <svg class="w-6 h-6 text-red-600 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+                <div class="flex-1">
+                    <p class="text-red-800 font-medium mb-2">Erro ao criar categoria:</p>
+                    <ul class="list-disc list-inside text-red-700 text-sm">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
             </div>
-        @endif
+        </div>
+    @endif
 
-        <form method="POST" action="{{ route('admin.categorias.store') }}">
-            @csrf
+    <!-- Formulário -->
+    <form method="POST" action="{{ route('admin.categorias.store') }}">
+        @csrf
 
-            <div class="mb-6">
-                <label class="block text-gray-700 font-semibold mb-2">Nome da Categoria *</label>
+        <div class="bg-white rounded-xl shadow-md p-8 space-y-6">
+            
+            <!-- Preview Icon -->
+            <div class="flex justify-center">
+                <div class="w-24 h-24 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center shadow-lg">
+                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-200 pt-6"></div>
+
+            <!-- Nome -->
+            <div>
+                <label class="block text-gray-900 font-bold mb-2">Nome da Categoria *</label>
                 <input type="text" name="name" value="{{ old('name') }}" 
-                       placeholder="Ex: Ficção, Romance, Suspense..."
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" 
+                       placeholder="Ex: Ficção, Romance, Tecnologia..."
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition" 
                        required>
             </div>
 
-            <div class="flex gap-4">
-                <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-semibold">
-                    Salvar Categoria
+            <!-- Descrição -->
+            <div>
+                <label class="block text-gray-900 font-bold mb-2">Descrição</label>
+                <textarea name="description" rows="4" 
+                          placeholder="Descreva sobre que tipo de livros pertencem a essa categoria..."
+                          class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">{{ old('description') }}</textarea>
+                <p class="text-sm text-gray-500 mt-1">Informações adicionais sobre a categoria</p>
+            </div>
+
+            <!-- Botões -->
+            <div class="flex gap-4 pt-6 border-t border-gray-200">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-8 py-3 rounded-lg transition shadow-lg hover:shadow-xl flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Criar Categoria
                 </button>
-                <a href="{{ route('admin.categorias.index') }}" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition font-semibold">
+                <a href="{{ route('admin.categorias.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold px-8 py-3 rounded-lg transition shadow-lg hover:shadow-xl flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
                     Cancelar
                 </a>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 @endsection

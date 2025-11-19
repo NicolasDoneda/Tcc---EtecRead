@@ -5,51 +5,66 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Models\Reservation;
 use App\Models\Book;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 class ReservationWebController extends Controller
 {
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'user_id' => 'required|exists:users,id',
+        // Verifica se é admin
+        if (auth()->user()->role === 'admin') {
+            return redirect()->back()->with('error', 'Administradores não podem fazer reservas!');
+        }
+
+        $validated = $request->validate([
             'book_id' => 'required|exists:books,id',
         ]);
 
-        // Verifica se o usuário é o mesmo logado
-        if ($data['user_id'] != auth()->id()) {
-            return back()->withErrors(['error' => 'Você só pode fazer reservas para você mesmo.']);
+        $book = Book::findOrFail($validated['book_id']);
+
+        // Verifica se o livro tem estoque
+        if ($book->available_quantity > 0) {
+            return back()->with('error', 'Este livro está disponível para empréstimo!');
         }
 
-        // Verifica se o usuário é aluno
-        $user = User::find($data['user_id']);
-        if ($user->role !== 'aluno') {
-            return back()->withErrors(['error' => 'Apenas alunos podem fazer reservas.']);
+        // Verifica se o usuário já tem uma reserva ativa para este livro
+        $existingReservation = Reservation::where('user_id', auth()->id())
+            ->where('book_id', $validated['book_id'])
+            ->whereIn('status', ['pendente', 'confirmado'])
+            ->first();
+
+        if ($existingReservation) {
+            return back()->with('error', 'Você já possui uma reserva ativa para este livro!');
         }
 
-        // Verifica se já tem reserva ativa deste livro
-        $reservaAtiva = Reservation::where('user_id', $data['user_id'])
-            ->where('book_id', $data['book_id'])
-            ->where('status', 'pendente')
-            ->exists();
+        // Cria a reserva
+        Reservation::create([
+            'user_id' => auth()->id(),
+            'book_id' => $validated['book_id'],
+            'reserved_at' => now(),
+            'status' => 'pendente',
+        ]);
 
-        if ($reservaAtiva) {
-            return back()->withErrors(['error' => 'Você já possui uma reserva pendente deste livro.']);
+        return back()->with('success', 'Reserva realizada com sucesso! Você será notificado quando o livro estiver disponível.');
+    }
+
+    public function cancel($id)
+    {
+        $reservation = Reservation::findOrFail($id);
+
+        // Verifica se a reserva pertence ao usuário logado
+        if ($reservation->user_id !== auth()->id()) {
+            return redirect()->route('reservas.minhas')->with('error', 'Você não tem permissão para cancelar esta reserva!');
         }
 
-        // Verifica se o livro tem estoque (se tiver, não pode reservar)
-        $book = Book::find($data['book_id']);
-        if ($book->hasAvailableStock()) {
-            return back()->withErrors(['error' => 'Livro disponível em estoque. Procure a biblioteca para fazer o empréstimo.']);
+        // Verifica se a reserva está em status que pode ser cancelada
+        if ($reservation->status === 'cancelado') {
+            return redirect()->route('reservas.minhas')->with('error', 'Esta reserva já está cancelada!');
         }
 
-        $data['reservation_date'] = Carbon::now();
-        $data['status'] = 'pendente';
+        $reservation->status = 'cancelado';
+        $reservation->save();
 
-        Reservation::create($data);
-
-        return back()->with('success', 'Reserva realizada com sucesso! Você será avisado quando o livro estiver disponível.');
+        return redirect()->route('reservas.minhas')->with('success', 'Reserva cancelada com sucesso!');
     }
 }

@@ -2,22 +2,30 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use Illuminate\Database\Eloquent\Model;
 
 class Reservation extends Model
 {
     use HasFactory;
-    protected $fillable = ['user_id', 'book_id', 'status', 'reserved_at'];
 
-    public function user(): BelongsTo
+    protected $fillable = [
+        'user_id',
+        'book_id',
+        'status',
+        'reserved_at'
+    ];
+
+    protected $casts = [
+        'reserved_at' => 'datetime'
+    ];
+
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function book(): BelongsTo
+    public function book()
     {
         return $this->belongsTo(Book::class);
     }

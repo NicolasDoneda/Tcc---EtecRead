@@ -8,6 +8,7 @@ use App\Models\Book;
 use App\Models\Loan;
 use App\Models\Reservation;
 use App\Models\Category;
+use App\Models\Author;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -20,62 +21,70 @@ class AdminController extends Controller
     public function dashboard()
     {
         $stats = [
+            'total_livros' => Book::count(),
+            'livros_disponiveis' => Book::where('available_quantity', '>', 0)->count(),
+            'total_usuarios' => User::count(),
             'total_alunos' => User::where('role', 'aluno')->count(),
-            'total_livros' => Book::sum('total_quantity'),
-            'livros_disponiveis' => Book::sum('available_quantity'),
-            'total_emprestimos' => Loan::count(),
             'emprestimos_ativos' => Loan::where('status', 'ativo')->count(),
+            'total_emprestimos' => Loan::count(),
             'reservas_pendentes' => Reservation::where('status', 'pendente')->count(),
+            'total_reservas' => Reservation::count(),
+            'emprestimos_atrasados' => Loan::where('status', 'ativo')
+                ->where('due_date', '<', now())
+                ->count(),
         ];
 
-        $livrosMaisEmprestados = Book::withCount('loans')
-            ->orderBy('loans_count', 'desc')
+        $emprestimosRecentes = Loan::with(['book', 'user'])
+            ->orderBy('loan_date', 'desc')
             ->take(5)
             ->get();
 
-        $alunosPorAno = User::where('role', 'aluno')
-            ->selectRaw('ano_escolar, COUNT(*) as total')
-            ->groupBy('ano_escolar')
-            ->orderBy('ano_escolar')
-            ->get();
-
-        $emprestimosAtrasados = Loan::where('status', 'ativo')
-            ->where('due_date', '<', now())
-            ->with(['user', 'book'])
-            ->get();
-
-        $emprestimosRecentes = Loan::with(['user', 'book'])
-            ->latest()
-            ->take(10)
+        $reservasPendentes = Reservation::with(['book', 'user'])
+            ->where('status', 'pendente')
+            ->orderBy('reserved_at', 'desc')
+            ->take(5)
             ->get();
 
         return view('admin.dashboard', compact(
             'stats',
-            'livrosMaisEmprestados',
-            'alunosPorAno',
-            'emprestimosAtrasados',
-            'emprestimosRecentes'
+            'emprestimosRecentes',
+            'reservasPendentes'
         ));
     }
 
     // ============= LIVROS =============
     public function books(Request $request)
     {
-        $query = Book::with('category');
+        $query = Book::with(['authors', 'category']);
 
+        // Busca
         if ($request->filled('search')) {
-            $query->where('title', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('isbn', 'like', "%{$search}%")
+                    ->orWhereHas('authors', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
+            });
         }
 
-        $livros = $query->paginate(15);
+        // Filtro por categoria
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
 
-        return view('admin.livros.index', compact('livros'));
+        $books = $query->orderBy('title', 'asc')->paginate(15);
+        $categories = Category::orderBy('name', 'asc')->get();
+
+        return view('admin.livros.index', compact('books', 'categories'));
     }
 
     public function createBook()
     {
         $categorias = Category::all();
-        return view('admin.livros.create', compact('categorias'));
+        $autores = Author::all();
+        return view('admin.livros.create', compact('categorias', 'autores'));
     }
 
     public function storeBook(Request $request)
@@ -87,7 +96,11 @@ class AdminController extends Controller
             'year' => 'nullable|integer|min:1000|max:' . date('Y'),
             'total_quantity' => 'required|integer|min:0',
             'available_quantity' => 'required|integer|min:0',
+            'description' => 'nullable|string',
+            'notes' => 'nullable|string',
             'cover_image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+            'authors' => 'nullable|array',
+            'authors.*' => 'exists:authors,id',
         ]);
 
         if ($validated['available_quantity'] > $validated['total_quantity']) {
@@ -99,16 +112,22 @@ class AdminController extends Controller
             $validated['cover_image'] = $path;
         }
 
-        Book::create($validated);
+        $book = Book::create($validated);
+
+        // Associa os autores
+        if ($request->has('authors')) {
+            $book->authors()->attach($request->authors);
+        }
 
         return redirect()->route('admin.livros.index')->with('success', 'Livro criado com sucesso!');
     }
 
     public function editBook($id)
     {
-        $livro = Book::findOrFail($id);
+        $livro = Book::with('authors')->findOrFail($id);
         $categorias = Category::all();
-        return view('admin.livros.edit', compact('livro', 'categorias'));
+        $autores = Author::all();
+        return view('admin.livros.edit', compact('livro', 'categorias', 'autores'));
     }
 
     public function updateBook(Request $request, $id)
@@ -122,7 +141,11 @@ class AdminController extends Controller
             'year' => 'nullable|integer|min:1000|max:' . date('Y'),
             'total_quantity' => 'required|integer|min:0',
             'available_quantity' => 'required|integer|min:0',
+            'description' => 'nullable|string',
+            'notes' => 'nullable|string',
             'cover_image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+            'authors' => 'nullable|array',
+            'authors.*' => 'exists:authors,id',
         ]);
 
         if ($validated['available_quantity'] > $validated['total_quantity']) {
@@ -140,6 +163,13 @@ class AdminController extends Controller
 
         $livro->update($validated);
 
+        // Atualiza os autores
+        if ($request->has('authors')) {
+            $livro->authors()->sync($request->authors);
+        } else {
+            $livro->authors()->detach();
+        }
+
         return redirect()->route('admin.livros.index')->with('success', 'Livro atualizado com sucesso!');
     }
 
@@ -155,12 +185,103 @@ class AdminController extends Controller
 
         return redirect()->route('admin.livros.index')->with('success', 'Livro deletado com sucesso!');
     }
-
-    // ============= CATEGORIAS =============
-    public function categories()
+    // ============= AUTORES =============
+    public function authors(Request $request)
     {
-        $categorias = Category::withCount('books')->paginate(15);
-        return view('admin.categorias.index', compact('categorias'));
+        $query = Author::withCount('books');
+
+        // Busca
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $authors = $query->orderBy('name', 'asc')->paginate(12);
+
+        return view('admin.autores.index', compact('authors'));
+    }
+
+    public function createAuthor()
+    {
+        return view('admin.autores.create');
+    }
+
+    public function storeAuthor(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'bio' => 'nullable|string',
+            'birth_date' => 'nullable|date',
+            'death_date' => 'nullable|date|after_or_equal:birth_date',
+            'photo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+        ]);
+
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('authors', 'public');
+            $validated['photo'] = $path;
+        }
+
+        Author::create($validated);
+
+        return redirect()->route('admin.autores.index')->with('success', 'Autor criado com sucesso!');
+    }
+
+    public function editAuthor($id)
+    {
+        $autor = Author::findOrFail($id);
+        return view('admin.autores.edit', compact('autor'));
+    }
+
+    public function updateAuthor(Request $request, $id)
+    {
+        $autor = Author::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'bio' => 'nullable|string',
+            'birth_date' => 'nullable|date',
+            'death_date' => 'nullable|date|after_or_equal:birth_date',
+            'photo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+        ]);
+
+        if ($request->hasFile('photo')) {
+            if ($autor->photo && Storage::disk('public')->exists($autor->photo)) {
+                Storage::disk('public')->delete($autor->photo);
+            }
+
+            $path = $request->file('photo')->store('authors', 'public');
+            $validated['photo'] = $path;
+        }
+
+        $autor->update($validated);
+
+        return redirect()->route('admin.autores.index')->with('success', 'Autor atualizado com sucesso!');
+    }
+
+    public function destroyAuthor($id)
+    {
+        $autor = Author::findOrFail($id);
+
+        if ($autor->photo && Storage::disk('public')->exists($autor->photo)) {
+            Storage::disk('public')->delete($autor->photo);
+        }
+
+        $autor->delete();
+
+        return redirect()->route('admin.autores.index')->with('success', 'Autor deletado com sucesso!');
+    }
+    // ============= CATEGORIAS =============
+    public function categories(Request $request)
+    {
+        $query = Category::withCount('books');
+
+        // Busca
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $categories = $query->orderBy('name', 'asc')->paginate(12);
+
+        return view('admin.categorias.index', compact('categories'));
     }
 
     public function createCategory()
@@ -172,6 +293,7 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:categories',
+            'description' => 'nullable|string',
         ]);
 
         Category::create($validated);
@@ -191,6 +313,7 @@ class AdminController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('categories')->ignore($id)],
+            'description' => 'nullable|string',
         ]);
 
         $categoria->update($validated);
@@ -211,18 +334,24 @@ class AdminController extends Controller
     {
         $query = User::query();
 
+        // Filtro por tipo
         if ($request->filled('role')) {
             $query->where('role', $request->role);
         }
 
+        // Busca
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%')
-                ->orWhere('email', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('rm', 'like', "%{$search}%");
+            });
         }
 
-        $usuarios = $query->paginate(15);
+        $users = $query->orderBy('name', 'asc')->paginate(15);
 
-        return view('admin.usuarios.index', compact('usuarios'));
+        return view('admin.usuarios.index', compact('users'));
     }
 
     public function createUser()
@@ -298,6 +427,11 @@ class AdminController extends Controller
     {
         $usuario = User::findOrFail($id);
 
+        // Impede que o admin exclua a si mesmo
+        if ($usuario->id === auth()->id()) {
+            return redirect()->route('admin.usuarios.index')->with('error', 'Você não pode excluir sua própria conta!');
+        }
+
         if ($usuario->photo && Storage::disk('public')->exists($usuario->photo)) {
             Storage::disk('public')->delete($usuario->photo);
         }
@@ -310,21 +444,39 @@ class AdminController extends Controller
     // ============= EMPRÉSTIMOS =============
     public function loans(Request $request)
     {
-        $query = Loan::with(['user', 'book']);
+        $query = Loan::with(['book.authors', 'user']);
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        // Busca
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('user', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                })->orWhereHas('book', function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%");
+                });
+            });
         }
 
-        $emprestimos = $query->latest()->paginate(15);
+        // Filtro por status
+        if ($request->filled('status')) {
+            if ($request->status === 'atrasado') {
+                $query->where('status', 'ativo')
+                    ->where('due_date', '<', now());
+            } else {
+                $query->where('status', $request->status);
+            }
+        }
 
-        return view('admin.emprestimos.index', compact('emprestimos'));
+        $loans = $query->orderBy('loan_date', 'desc')->paginate(15);
+
+        return view('admin.emprestimos.index', compact('loans'));
     }
 
     public function createLoan()
     {
-        $usuarios = User::where('role', 'aluno')->get();
-        $livros = Book::where('available_quantity', '>', 0)->get();
+        $usuarios = User::where('role', 'aluno')->orderBy('name', 'asc')->get();
+        $livros = Book::where('available_quantity', '>', 0)->orderBy('title', 'asc')->get();
         return view('admin.emprestimos.create', compact('usuarios', 'livros'));
     }
 
@@ -337,7 +489,7 @@ class AdminController extends Controller
         ]);
 
         $book = Book::find($validated['book_id']);
-        if (!$book->hasAvailableStock()) {
+        if ($book->available_quantity <= 0) {
             return back()->withErrors(['book_id' => 'Livro sem estoque disponível.'])->withInput();
         }
 
@@ -345,63 +497,56 @@ class AdminController extends Controller
         $validated['status'] = 'ativo';
 
         Loan::create($validated);
-        $book->decreaseStock();
+
+        // Diminui estoque
+        $book->decrement('available_quantity');
 
         return redirect()->route('admin.emprestimos.index')->with('success', 'Empréstimo criado com sucesso!');
     }
 
-    public function editLoan($id)
+    public function returnLoan($id)
     {
-        $emprestimo = Loan::with(['user', 'book'])->findOrFail($id);
-        return view('admin.emprestimos.edit', compact('emprestimo'));
-    }
+        $loan = Loan::findOrFail($id);
 
-    public function updateLoan(Request $request, $id)
-    {
-        $emprestimo = Loan::findOrFail($id);
+        if ($loan->status !== 'ativo') {
+            return redirect()->route('admin.emprestimos.index')->with('error', 'Este empréstimo já foi devolvido!');
+        }
 
-        $validated = $request->validate([
-            'due_date' => 'nullable|date',
-            'return_date' => 'nullable|date',
-            'status' => 'required|in:ativo,finalizado',
-        ]);
+        $loan->status = 'finalizado';
+        $loan->return_date = now();
+        $loan->save();
 
-        if ($validated['status'] === 'finalizado' && $emprestimo->status === 'ativo') {
-            $validated['return_date'] = $validated['return_date'] ?? now();
-            $emprestimo->book->increaseStock();
+        // Aumenta a quantidade disponível do livro
+        $loan->book->increment('available_quantity');
 
-            // ✅ Confirma próxima reserva pendente
-            $proximaReserva = Reservation::where('book_id', $emprestimo->book_id)
-                ->where('status', 'pendente')
-                ->oldest()
-                ->first();
+        // Confirma próxima reserva pendente
+        $proximaReserva = Reservation::where('book_id', $loan->book_id)
+            ->where('status', 'pendente')
+            ->oldest()
+            ->first();
 
-            if ($proximaReserva) {
-                $proximaReserva->update(['status' => 'confirmado']); // ✅ CORRIGIDO
+        if ($proximaReserva) {
+            $proximaReserva->update(['status', 'confirmado']);
 
-                // ✅ ENVIA EMAIL!
-                try {
-                    $proximaReserva->user->notify(new ReservationConfirmedNotification($proximaReserva));
-                } catch (\Exception $e) {
-                    \Log::error('Erro ao enviar email de reserva: ' . $e->getMessage());
-                }
+            try {
+                $proximaReserva->user->notify(new ReservationConfirmedNotification($proximaReserva));
+            } catch (\Exception $e) {
+                \Log::error('Erro ao enviar email de reserva: ' . $e->getMessage());
             }
         }
 
-        $emprestimo->update($validated);
-
-        return redirect()->route('admin.emprestimos.index')->with('success', 'Empréstimo atualizado com sucesso!');
+        return redirect()->route('admin.emprestimos.index')->with('success', 'Devolução registrada com sucesso!');
     }
 
     public function destroyLoan($id)
     {
-        $emprestimo = Loan::findOrFail($id);
+        $loan = Loan::findOrFail($id);
 
-        if ($emprestimo->status === 'ativo') {
-            $emprestimo->book->increaseStock();
+        if ($loan->status === 'ativo') {
+            $loan->book->increment('available_quantity');
         }
 
-        $emprestimo->delete();
+        $loan->delete();
 
         return redirect()->route('admin.emprestimos.index')->with('success', 'Empréstimo deletado com sucesso!');
     }
@@ -409,50 +554,72 @@ class AdminController extends Controller
     // ============= RESERVAS =============
     public function reservations(Request $request)
     {
-        $query = Reservation::with(['user', 'book.category']);
+        $query = Reservation::with(['book.authors', 'user']);
 
+        // Busca
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('user', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%");
+                })->orWhereHas('book', function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        // Filtro por status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        $reservas = $query->latest()->paginate(15);
+        $reservations = $query->orderBy('reserved_at', 'desc')->paginate(15);
 
-        return view('admin.reservas.index', compact('reservas'));
+        // Stats
+        $stats = [
+            'pendentes' => Reservation::where('status', 'pendente')->count(),
+            'confirmadas' => Reservation::where('status', 'confirmado')->count(),
+            'canceladas' => Reservation::where('status', 'cancelado')->count(),
+        ];
+
+        return view('admin.reservas.index', compact('reservations', 'stats'));
     }
 
     public function confirmReservation($id)
     {
-        $reserva = Reservation::with(['user', 'book'])->findOrFail($id);
+        $reservation = Reservation::with(['user', 'book'])->findOrFail($id);
 
-        if ($reserva->status !== 'pendente') {
-            return back()->withErrors(['error' => 'Esta reserva não está pendente.']);
+        if ($reservation->status !== 'pendente') {
+            return redirect()->route('admin.reservas.index')->with('error', 'Esta reserva não está pendente!');
         }
 
-        if ($reserva->book->available_quantity <= 0) {
-            return back()->withErrors(['error' => 'Livro sem estoque disponível.']);
+        if ($reservation->book->available_quantity <= 0) {
+            return redirect()->route('admin.reservas.index')->with('error', 'Livro sem estoque disponível!');
         }
 
-        // ✅ Confirma a reserva (CORRIGIDO: confirmado em vez de confirmada)
-        $reserva->update(['status' => 'confirmado']);
+        $reservation->status = 'confirmado';
+        $reservation->save();
 
-        // ✅ ENVIA EMAIL!
+        // Notifica o usuário
         try {
-            $reserva->user->notify(new ReservationConfirmedNotification($reserva));
-            return back()->with('success', 'Reserva confirmada e aluno notificado por email!');
+            $reservation->user->notify(new ReservationConfirmedNotification($reservation));
+            return redirect()->route('admin.reservas.index')->with('success', 'Reserva confirmada e aluno notificado por email!');
         } catch (\Exception $e) {
-            return back()->with('success', 'Reserva confirmada! (Email não pôde ser enviado: ' . $e->getMessage() . ')');
+            \Log::error('Erro ao enviar email de reserva: ' . $e->getMessage());
+            return redirect()->route('admin.reservas.index')->with('success', 'Reserva confirmada! (Email não pôde ser enviado)');
         }
     }
 
     public function cancelReservation($id)
     {
-        $reserva = Reservation::findOrFail($id);
+        $reservation = Reservation::findOrFail($id);
 
-        // ✅ CORRIGIDO: cancelado em vez de cancelada
-        $reserva->update(['status' => 'cancelado']);
+        $reservation->status = 'cancelado';
+        $reservation->save();
 
-        return back()->with('success', 'Reserva cancelada com sucesso!');
+        return redirect()->route('admin.reservas.index')->with('success', 'Reserva cancelada com sucesso!');
     }
+
 
     // ============= COMANDOS =============
     public function promoteStudents()

@@ -4,9 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
@@ -20,34 +18,27 @@ class ProfileController extends Controller
     {
         $user = auth()->user();
 
-        $validated = $request->validate([
+        $request->validate([
             'name' => 'required|string|max:255',
-            'email' => [
-                'required',
-                'email',
-                Rule::unique('users')->ignore($user->id)
-            ],
-            'password' => 'nullable|string|min:6|confirmed',
-            'photo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|confirmed|min:6',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        // Atualiza nome e email
-        $user->name = $validated['name'];
-        $user->email = $validated['email'];
+        $user->name = $request->name;
+        $user->email = $request->email;
 
-        // Atualiza senha se fornecida
-        if (!empty($validated['password'])) {
-            $user->password = Hash::make($validated['password']);
+        if ($request->filled('password')) {
+            $user->password = bcrypt($request->password);
         }
 
-        // Upload da nova foto
         if ($request->hasFile('photo')) {
-            // Deleta a foto antiga
-            if ($user->photo && Storage::disk('public')->exists($user->photo)) {
-                Storage::disk('public')->delete($user->photo);
+            // Deleta foto antiga se existir
+            if ($user->photo) {
+                Storage::delete('public/' . $user->photo);
             }
             
-            $path = $request->file('photo')->store('users', 'public');
+            $path = $request->file('photo')->store('photos', 'public');
             $user->photo = $path;
         }
 

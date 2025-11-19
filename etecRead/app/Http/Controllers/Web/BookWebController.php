@@ -35,9 +35,15 @@ class BookWebController extends Controller
     }
     
     public function show($id)
-    {
-        $livro = Book::with('category')->findOrFail($id);
-        
-        return view('livros.show', compact('livro'));
-    }
+{
+    $livro = Book::with(['authors', 'category', 'loans', 'reservations'])->findOrFail($id);
+    
+    // Livros similares (mesma categoria)
+    $livrosSimilares = Book::where('category_id', $livro->category_id)
+        ->where('id', '!=', $livro->id)
+        ->limit(4)
+        ->get();
+    
+    return view('livros.show', compact('livro', 'livrosSimilares'));
+}
 }
