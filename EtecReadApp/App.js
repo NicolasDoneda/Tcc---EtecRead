@@ -1,194 +1,142 @@
-// App.js
-// ✅ VERSÃO COMPATÍVEL COM EXPO
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
-import { ActivityIndicator, View, Text } from 'react-native';
+import React, { useEffect, useState } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ActivityIndicator, View } from "react-native";
 
-import { AuthProvider, useAuth } from './src/contexts/AuthContext';
-
-// Auth Screens
-import LoginScreen from './src/screens/auth/LoginScreen';
+// Screens
+import LoginScreen from "./src/screens/auth/LoginScreen";
 
 // Student Screens
-import CatalogScreen from './src/screens/student/CatalogScreen';
-import MyLoansScreen from './src/screens/student/MyLoansScreen';
-import AdvancedSearchScreen from './src/screens/student/AdvancedSearchScreen';
-import ProfileScreen from './src/screens/student/ProfileScreen';
-import SupportScreen from './src/screens/student/SupportScreen';
+import CatalogScreen from "./src/screens/student/CatalogScreen";
+import MyLoansScreen from "./src/screens/student/MyLoansScreen";
+import AdvancedSearchScreen from "./src/screens/student/AdvancedSearchScreen";
+import ProfileScreen from "./src/screens/student/ProfileScreen";
+import SupportScreen from "./src/screens/student/SupportScreen";
 
 // Admin Screens
-import AdminDashboardScreen from './src/screens/admin/AdminDashboardScreen';
-import AdminLoansScreen from './src/screens/admin/AdminLoansScreen';
-import AdminReservationsScreen from './src/screens/admin/AdminReservationsScreen';
-import AdminReportsScreen from './src/screens/admin/AdminReportsScreen';
-import AdminSettingsScreen from './src/screens/admin/AdminSettingsScreen';
+import AdminDashboardScreen from "./src/screens/admin/AdminDashboardScreen";
+import AdminLoansScreen from "./src/screens/admin/AdminLoansScreen";
+import AdminReservationsScreen from "./src/screens/admin/AdminReservationsScreen";
+import AdminReportsScreen from "./src/screens/admin/AdminReportsScreen";
+import AdminSettingsScreen from "./src/screens/admin/AdminSettingsScreen";
 
-const Tab = createBottomTabNavigator();
-const Stack = createStackNavigator();
+// Components
+import MobileMenu from "./src/components/MobileMenu";
+import MobileHeader from "./src/components/MobileHeader";
 
-// ✅ CORRIGIDO: Componente de ícone simples para Expo
-function TabIcon({ emoji }) {
-  return <Text style={{ fontSize: 24 }}>{emoji}</Text>;
-}
+const Stack = createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
 
-// Tab Navigator para ALUNOS
-function StudentTabs() {
+// Recebe onLogout como prop 
+function AppDrawer({ user, onLogout }) {
+  const isAdmin = user.role === "admin";
+
   return (
-    <Tab.Navigator
-      screenOptions={{
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: '#999',
-        headerShown: true,
-        tabBarStyle: {
-          paddingBottom: 5,
-          paddingTop: 5,
-          height: 60,
-        },
-      }}
+    <Drawer.Navigator
+      initialRouteName={isAdmin ? "Dashboard" : "Catalog"}
+      drawerContent={(props) => (
+        <MobileMenu
+          {...props}
+          role={user.role}
+          onLogout={onLogout} // Passando a function de logOut
+        />
+      )}
+      screenOptions={({ navigation }) =>
+        isAdmin
+          ? {
+              header: () => (
+                <MobileHeader
+                  onMenuClick={() => navigation.toggleDrawer()}
+                  isMenuOpen={false}
+                />
+              ),
+            }
+          : { headerShown: false }
+      }
     >
-      <Tab.Screen
-        name="Catalog"
-        component={CatalogScreen}
-        options={{
-          title: 'Catálogo',
-          tabBarIcon: () => <TabIcon emoji="📚" />,
-        }}
-      />
-      <Tab.Screen
-        name="MyLoans"
-        component={MyLoansScreen}
-        options={{
-          title: 'Empréstimos',
-          tabBarIcon: () => <TabIcon emoji="📖" />,
-        }}
-      />
-      <Tab.Screen
-        name="Search"
-        component={AdvancedSearchScreen}
-        options={{
-          title: 'Busca',
-          tabBarIcon: () => <TabIcon emoji="🔍" />,
-        }}
-      />
-      <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{
-          title: 'Perfil',
-          tabBarIcon: () => <TabIcon emoji="👤" />,
-        }}
-      />
-      <Tab.Screen
-        name="Support"
-        component={SupportScreen}
-        options={{
-          title: 'Suporte',
-          tabBarIcon: () => <TabIcon emoji="❓" />,
-        }}
-      />
-    </Tab.Navigator>
+      {/* ROTAS ADMIN */}
+      {isAdmin && (
+        <>
+          <Drawer.Screen name="Dashboard" component={AdminDashboardScreen} />
+          <Drawer.Screen name="Loans" component={AdminLoansScreen} />
+          <Drawer.Screen
+            name="Reservations"
+            component={AdminReservationsScreen}
+          />
+          <Drawer.Screen name="Reports" component={AdminReportsScreen} />
+          <Drawer.Screen name="Settings" component={AdminSettingsScreen} />
+        </>
+      )}
+
+      {/* ROTAS ALUNO*/}
+      {!isAdmin && (
+        <>
+          <Drawer.Screen name="Catalog" component={CatalogScreen} />
+          <Drawer.Screen name="MyLoans" component={MyLoansScreen} />
+          <Drawer.Screen name="Search" component={AdvancedSearchScreen} />
+          <Drawer.Screen name="Profile" component={ProfileScreen} />
+          <Drawer.Screen name="Support" component={SupportScreen} />
+        </>
+      )}
+    </Drawer.Navigator>
   );
 }
 
-// Tab Navigator para ADMINS
-function AdminTabs() {
-  return (
-    <Tab.Navigator
-      screenOptions={{
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: '#999',
-        headerShown: true,
-        tabBarStyle: {
-          paddingBottom: 5,
-          paddingTop: 5,
-          height: 60,
-        },
-      }}
-    >
-      <Tab.Screen
-        name="Dashboard"
-        component={AdminDashboardScreen}
-        options={{
-          title: 'Dashboard',
-          tabBarIcon: () => <TabIcon emoji="📊" />,
-        }}
-      />
-      <Tab.Screen
-        name="Loans"
-        component={AdminLoansScreen}
-        options={{
-          title: 'Empréstimos',
-          tabBarIcon: () => <TabIcon emoji="📖" />,
-        }}
-      />
-      <Tab.Screen
-        name="Reservations"
-        component={AdminReservationsScreen}
-        options={{
-          title: 'Reservas',
-          tabBarIcon: () => <TabIcon emoji="📋" />,
-        }}
-      />
-      <Tab.Screen
-        name="Reports"
-        component={AdminReportsScreen}
-        options={{
-          title: 'Relatórios',
-          tabBarIcon: () => <TabIcon emoji="📈" />,
-        }}
-      />
-      <Tab.Screen
-        name="Settings"
-        component={AdminSettingsScreen}
-        options={{
-          title: 'Configurações',
-          tabBarIcon: () => <TabIcon emoji="⚙️" />,
-        }}
-      />
-    </Tab.Navigator>
-  );
-}
+export default function App() {
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
-// Navegação principal
-function AppNavigator() {
-  const { user, loading, isAdmin } = useAuth();
+  useEffect(() => {
+    async function loadUser() {
+      try {
+        const data = await AsyncStorage.getItem("user");
+        if (data) setUser(JSON.parse(data));
+      } catch (e) {
+        console.log("Erro ao carregar user", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadUser();
+  }, []);
+
+  // FUNÇÃO QUE LIMPA O ESTADO DO USUÁRIO
+  async function handleLogout() {
+    await AsyncStorage.removeItem("user");
+    setUser(null);
+  }
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f5f5f5' }}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={{ marginTop: 10, fontSize: 16, color: '#666' }}>
-          Carregando...
-        </Text>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#fff",
+        }}
+      >
+        <ActivityIndicator size="large" color="#dc2626" />
       </View>
     );
   }
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {!user ? (
-        // Não autenticado - Tela de Login
-        <Stack.Screen name="Login" component={LoginScreen} />
-      ) : isAdmin() ? (
-        // Admin autenticado - Tabs de Administrador
-        <Stack.Screen name="AdminTabs" component={AdminTabs} />
-      ) : (
-        // Aluno autenticado - Tabs de Aluno
-        <Stack.Screen name="StudentTabs" component={StudentTabs} />
-      )}
-    </Stack.Navigator>
-  );
-}
-
-// App principal com Providers
-export default function App() {
-  return (
-    <AuthProvider>
-      <NavigationContainer>
-        <AppNavigator />
-      </NavigationContainer>
-    </AuthProvider>
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {!user ? (
+          <Stack.Screen name="Login">
+            {(props) => <LoginScreen {...props} setUser={setUser} />}
+          </Stack.Screen>
+        ) : (
+          <Stack.Screen name="MainDrawer">
+            {/* ✅ PASSANDO handleLogout para AppDrawer */}
+            {(props) => <AppDrawer {...props} user={user} onLogout={handleLogout} />}
+          </Stack.Screen>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }

@@ -1,5 +1,5 @@
 // src/services/api.js
-const API_URL = 'http://192.168.0.104:8000/api'; // ⚠️ MUDE ESTE IP!
+const API_URL = 'http://192.168.18.14:8000/api';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

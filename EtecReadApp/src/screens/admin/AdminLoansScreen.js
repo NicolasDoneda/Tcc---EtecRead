@@ -1,3 +1,4 @@
+// AdminLoansScreen.jsx
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -13,7 +14,7 @@ import api from '../../services/api';
 export default function AdminLoansScreen() {
   const [loans, setLoans] = useState([]);
   const [statistics, setStatistics] = useState(null);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState('all'); // all, ativo, overdue, finalizado
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -24,11 +25,9 @@ export default function AdminLoansScreen() {
   const loadData = async () => {
     try {
       const filters = {};
-      
-      // CORREÇÃO: Não passar string "true", passar apenas os filtros necessários
       if (filter === 'ativo') filters.status = 'ativo';
       if (filter === 'finalizado') filters.status = 'finalizado';
-      if (filter === 'overdue') filters.overdue = true; // Boolean direto, não string
+      if (filter === 'overdue') filters.overdue = true;
 
       const [loansRes, statsRes] = await Promise.all([
         api.adminLoans.getAll(filters),
@@ -115,7 +114,6 @@ export default function AdminLoansScreen() {
           </Text>
         </View>
         <View style={styles.dateContainer}>
-          <Text style={styles.dateLabel}>Devolução:</Text>
           <Text style={[
             styles.dateValue,
             item.is_overdue && styles.overdueDate
@@ -145,46 +143,34 @@ export default function AdminLoansScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.filtersContainer}>
-        <TouchableOpacity
-          style={[styles.filterTab, filter === 'all' && styles.activeTab]}
-          onPress={() => setFilter('all')}
-        >
-          <Text style={[styles.filterText, filter === 'all' && styles.activeFilterText]}>
-            Todos
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterTab, filter === 'ativo' && styles.activeTab]}
-          onPress={() => setFilter('ativo')}
-        >
-          <Text style={[styles.filterText, filter === 'ativo' && styles.activeFilterText]}>
-            Ativos
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterTab, filter === 'overdue' && styles.activeTab]}
-          onPress={() => setFilter('overdue')}
-        >
-          <Text style={[styles.filterText, filter === 'overdue' && styles.activeFilterText]}>
-            Atrasados
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterTab, filter === 'finalizado' && styles.activeTab]}
-          onPress={() => setFilter('finalizado')}
-        >
-          <Text style={[styles.filterText, filter === 'finalizado' && styles.activeFilterText]}>
-            Finalizados
-          </Text>
-        </TouchableOpacity>
+      {/* Tabs de Filtro */}
+      <View style={styles.tabsContainer}>
+        {['all', 'ativo', 'overdue', 'finalizado'].map((f) => {
+          const label = f === 'all' ? 'Todos' :
+                        f === 'ativo' ? 'Ativos' :
+                        f === 'overdue' ? 'Atrasados' : 'Finalizados';
+          return (
+            <TouchableOpacity
+              key={f}
+              style={[styles.tabButton, filter === f && styles.activeTabButton]}
+              onPress={() => setFilter(f)}
+            >
+              <Text style={[styles.tabText, filter === f && styles.activeTabText]}>
+                {label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
+      {/* Statistics */}
+      {statistics && renderStatistics()}
+
+      {/* Loans List */}
       <FlatList
         data={loans}
         renderItem={renderLoan}
         keyExtractor={(item) => item.id.toString()}
-        ListHeaderComponent={statistics && renderStatistics()}
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -200,165 +186,59 @@ export default function AdminLoansScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  loading: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  filtersContainer: {
+  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+
+  tabsContainer: {
     flexDirection: 'row',
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-  },
-  filterTab: {
-    flex: 1,
-    padding: 12,
-    alignItems: 'center',
-  },
-  activeTab: {
-    borderBottomWidth: 3,
-    borderBottomColor: '#007AFF',
-  },
-  filterText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  activeFilterText: {
-    color: '#007AFF',
-    fontWeight: 'bold',
-  },
-  listContent: {
-    padding: 15,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    marginBottom: 15,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: 'white',
-    padding: 12,
+    marginTop: 10,
+    marginHorizontal: 5,
     borderRadius: 10,
-    marginHorizontal: 3,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    overflow: 'hidden',
   },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#007AFF',
-  },
-  statLabel: {
-    fontSize: 11,
-    color: '#666',
-    marginTop: 2,
-  },
-  loanCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  loanHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  studentName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  studentInfo: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 2,
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-  },
-  activeBadge: {
-    backgroundColor: '#E8F5E9',
-  },
-  finishedBadge: {
-    backgroundColor: '#E0E0E0',
-  },
-  overdueBadge: {
-    backgroundColor: '#FFEBEE',
-  },
-  statusText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  loanBody: {
-    marginBottom: 12,
-  },
-  bookTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  bookCategory: {
-    fontSize: 13,
-    color: '#666',
-  },
-  loanFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  dateContainer: {
+  tabButton: {
     flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    backgroundColor: '#eee',
   },
-  dateLabel: {
-    fontSize: 11,
-    color: '#999',
+  activeTabButton: {
+    backgroundColor: '#dc2626', // vermelho
   },
-  dateValue: {
-    fontSize: 13,
+  tabText: {
     color: '#333',
     fontWeight: '500',
-    marginTop: 2,
   },
-  overdueDate: {
-    color: '#F44336',
-    fontWeight: 'bold',
+  activeTabText: {
+    color: '#fff', // texto branco
+    fontWeight: '700',
   },
-  overdueWarning: {
-    marginTop: 10,
-    padding: 8,
-    backgroundColor: '#FFEBEE',
-    borderRadius: 6,
-  },
-  overdueText: {
-    fontSize: 12,
-    color: '#D32F2F',
-    fontWeight: 'bold',
-  },
-  empty: {
-    padding: 50,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#999',
-  },
+
+  listContent: { padding: 15 },
+  statsContainer: { flexDirection: 'row', marginBottom: 15 },
+  statCard: { flex: 1, backgroundColor: 'white', padding: 12, borderRadius: 10, marginHorizontal: 3, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
+  statNumber: { fontSize: 24, fontWeight: 'bold', color: '#007AFF' },
+  statLabel: { fontSize: 11, color: '#666', marginTop: 2 },
+  loanCard: { backgroundColor: 'white', borderRadius: 12, padding: 15, marginBottom: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
+  loanHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
+  studentName: { fontSize: 16, fontWeight: 'bold', color: '#333' },
+  studentInfo: { fontSize: 12, color: '#999', marginTop: 2 },
+  statusBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
+  activeBadge: { backgroundColor: '#E8F5E9' },
+  finishedBadge: { backgroundColor: '#E0E0E0' },
+  overdueBadge: { backgroundColor: '#FFEBEE' },
+  statusText: { fontSize: 10, fontWeight: 'bold', color: '#333' },
+  loanBody: { marginBottom: 12 },
+  bookTitle: { fontSize: 15, fontWeight: '600', color: '#333', marginBottom: 4 },
+  bookCategory: { fontSize: 13, color: '#666' },
+  loanFooter: { flexDirection: 'row', justifyContent: 'space-between' },
+  dateContainer: { flex: 1 },
+  dateLabel: { fontSize: 11, color: '#999' },
+  dateValue: { fontSize: 13, color: '#333', fontWeight: '500', marginTop: 2 },
+  overdueDate: { color: '#F44336', fontWeight: 'bold' },
+  overdueWarning: { marginTop: 10, padding: 8, backgroundColor: '#FFEBEE', borderRadius: 6 },
+  overdueText: { fontSize: 12, color: '#D32F2F', fontWeight: 'bold' },
+  empty: { padding: 50, alignItems: 'center' },
+  emptyText: { fontSize: 16, color: '#999' },
 });
+

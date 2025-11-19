@@ -42,7 +42,8 @@
         {
           "photosPermission": "A aplicação precisa acessar suas fotos para você atualizar sua foto de perfil."
         }
-      ]
+      ],
+      "expo-font"
     ]
   }
 }

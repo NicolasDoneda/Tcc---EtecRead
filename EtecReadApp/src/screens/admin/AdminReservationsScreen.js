@@ -53,19 +53,19 @@ export default function AdminReservationsScreen() {
         <Text style={styles.statLabel}>Total</Text>
       </View>
       <View style={styles.statCard}>
-        <Text style={[styles.statNumber, { color: '#FFC107' }]}>
+        <Text style={[styles.statNumber, { color: '#F59E0B' }]}>
           {statistics?.pending || 0}
         </Text>
         <Text style={styles.statLabel}>Pendentes</Text>
       </View>
       <View style={styles.statCard}>
-        <Text style={[styles.statNumber, { color: '#4CAF50' }]}>
+        <Text style={[styles.statNumber, { color: '#10B981' }]}>
           {statistics?.confirmed || 0}
         </Text>
         <Text style={styles.statLabel}>Confirmadas</Text>
       </View>
       <View style={styles.statCard}>
-        <Text style={[styles.statNumber, { color: '#F44336' }]}>
+        <Text style={[styles.statNumber, { color: '#EF4444' }]}>
           {statistics?.cancelled || 0}
         </Text>
         <Text style={styles.statLabel}>Canceladas</Text>
@@ -90,19 +90,24 @@ export default function AdminReservationsScreen() {
             </Text>
           </View>
         </View>
-        <View style={[
-          styles.statusBadge,
-          item.status === 'pendente' && styles.pendingBadge,
-          item.status === 'confirmado' && styles.confirmedBadge,
-          item.status === 'cancelado' && styles.cancelledBadge,
-        ]}>
+        <View
+          style={[
+            styles.statusBadge,
+            item.status === 'pendente' && styles.pendingBadge,
+            item.status === 'confirmado' && styles.confirmedBadge,
+            item.status === 'cancelado' && styles.cancelledBadge,
+          ]}
+        >
           <Text style={styles.statusText}>{item.status.toUpperCase()}</Text>
         </View>
       </View>
 
       <View style={styles.bookSection}>
         <Image
-          source={{ uri: item.book.cover_image || 'https://via.placeholder.com/50x75' }}
+          source={{
+            uri:
+              item.book.cover_image || 'https://via.placeholder.com/50x75',
+          }}
           style={styles.bookCover}
         />
         <View style={styles.bookInfo}>
@@ -110,10 +115,14 @@ export default function AdminReservationsScreen() {
             {item.book.title}
           </Text>
           <Text style={styles.bookCategory}>{item.book.category}</Text>
-          <Text style={[
-            styles.availability,
-            item.book.available_quantity > 0 ? styles.available : styles.unavailable
-          ]}>
+          <Text
+            style={[
+              styles.availability,
+              item.book.available_quantity > 0
+                ? styles.available
+                : styles.unavailable,
+            ]}
+          >
             {item.book.available_quantity > 0
               ? `✓ ${item.book.available_quantity} disponível(is)`
               : '✗ Indisponível'}
@@ -132,19 +141,22 @@ export default function AdminReservationsScreen() {
   if (loading) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color="#EF4444" />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
+      {/* --- Tabs / Filtros --- */}
       <View style={styles.filtersContainer}>
         <TouchableOpacity
           style={[styles.filterTab, filter === 'all' && styles.activeTab]}
           onPress={() => setFilter('all')}
         >
-          <Text style={[styles.filterText, filter === 'all' && styles.activeFilterText]}>
+          <Text
+            style={[styles.filterText, filter === 'all' && styles.activeFilterText]}
+          >
             Todas
           </Text>
         </TouchableOpacity>
@@ -152,7 +164,9 @@ export default function AdminReservationsScreen() {
           style={[styles.filterTab, filter === 'pendente' && styles.activeTab]}
           onPress={() => setFilter('pendente')}
         >
-          <Text style={[styles.filterText, filter === 'pendente' && styles.activeFilterText]}>
+          <Text
+            style={[styles.filterText, filter === 'pendente' && styles.activeFilterText]}
+          >
             Pendentes
           </Text>
         </TouchableOpacity>
@@ -160,7 +174,12 @@ export default function AdminReservationsScreen() {
           style={[styles.filterTab, filter === 'confirmado' && styles.activeTab]}
           onPress={() => setFilter('confirmado')}
         >
-          <Text style={[styles.filterText, filter === 'confirmado' && styles.activeFilterText]}>
+          <Text
+            style={[
+              styles.filterText,
+              filter === 'confirmado' && styles.activeFilterText,
+            ]}
+          >
             Confirmadas
           </Text>
         </TouchableOpacity>
@@ -168,12 +187,18 @@ export default function AdminReservationsScreen() {
           style={[styles.filterTab, filter === 'cancelado' && styles.activeTab]}
           onPress={() => setFilter('cancelado')}
         >
-          <Text style={[styles.filterText, filter === 'cancelado' && styles.activeFilterText]}>
+          <Text
+            style={[
+              styles.filterText,
+              filter === 'cancelado' && styles.activeFilterText,
+            ]}
+          >
             Canceladas
           </Text>
         </TouchableOpacity>
       </View>
 
+      {/* --- Lista de reservas --- */}
       <FlatList
         data={reservations}
         renderItem={renderReservation}
@@ -194,18 +219,11 @@ export default function AdminReservationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  loading: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  container: { flex: 1, backgroundColor: '#fff' },
+  loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   filtersContainer: {
     flexDirection: 'row',
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
@@ -215,27 +233,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   activeTab: {
-    borderBottomWidth: 3,
-    borderBottomColor: '#007AFF',
+    backgroundColor: '#EF4444',
+    borderRadius: 8,
   },
   filterText: {
     fontSize: 13,
-    color: '#666',
+    color: '#B91C1C',
   },
   activeFilterText: {
-    color: '#007AFF',
+    color: '#fff',
     fontWeight: 'bold',
   },
-  listContent: {
-    padding: 15,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    marginBottom: 15,
-  },
+  listContent: { padding: 15 },
+  statsContainer: { flexDirection: 'row', marginBottom: 15 },
   statCard: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     padding: 12,
     borderRadius: 10,
     marginHorizontal: 3,
@@ -246,18 +259,10 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#007AFF',
-  },
-  statLabel: {
-    fontSize: 11,
-    color: '#666',
-    marginTop: 2,
-  },
+  statNumber: { fontSize: 24, fontWeight: 'bold', color: '#EF4444' },
+  statLabel: { fontSize: 11, color: '#666', marginTop: 2 },
   reservationCard: {
-    backgroundColor: 'white',
+    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 15,
     marginBottom: 10,
@@ -267,104 +272,27 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 15,
-  },
-  studentSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  studentPhoto: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-  },
-  studentInfo: {
-    flex: 1,
-  },
-  studentName: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  studentDetails: {
-    fontSize: 11,
-    color: '#999',
-    marginTop: 2,
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-  },
-  pendingBadge: {
-    backgroundColor: '#FFF3E0',
-  },
-  confirmedBadge: {
-    backgroundColor: '#E8F5E9',
-  },
-  cancelledBadge: {
-    backgroundColor: '#FFEBEE',
-  },
-  statusText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  bookSection: {
-    flexDirection: 'row',
-    marginBottom: 12,
-  },
-  bookCover: {
-    width: 50,
-    height: 75,
-    borderRadius: 5,
-    marginRight: 12,
-  },
-  bookInfo: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  bookTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  bookCategory: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
-  },
-  availability: {
-    fontSize: 11,
-    fontWeight: 'bold',
-  },
-  available: {
-    color: '#4CAF50',
-  },
-  unavailable: {
-    color: '#F44336',
-  },
-  dateInfo: {
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-  },
-  dateText: {
-    fontSize: 11,
-    color: '#999',
-  },
-  empty: {
-    padding: 50,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#999',
-  },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 15 },
+  studentSection: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  studentPhoto: { width: 40, height: 40, borderRadius: 20, marginRight: 10 },
+  studentInfo: { flex: 1 },
+  studentName: { fontSize: 15, fontWeight: 'bold', color: '#333' },
+  studentDetails: { fontSize: 11, color: '#999', marginTop: 2 },
+  statusBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
+  pendingBadge: { backgroundColor: '#FFF3E0' },
+  confirmedBadge: { backgroundColor: '#E8F5E9' },
+  cancelledBadge: { backgroundColor: '#FFEBEE' },
+  statusText: { fontSize: 10, fontWeight: 'bold' },
+  bookSection: { flexDirection: 'row', marginBottom: 12 },
+  bookCover: { width: 50, height: 75, borderRadius: 5, marginRight: 12 },
+  bookInfo: { flex: 1, justifyContent: 'center' },
+  bookTitle: { fontSize: 14, fontWeight: '600', color: '#333', marginBottom: 4 },
+  bookCategory: { fontSize: 12, color: '#666', marginBottom: 4 },
+  availability: { fontSize: 11, fontWeight: 'bold' },
+  available: { color: '#4CAF50' },
+  unavailable: { color: '#F44336' },
+  dateInfo: { paddingTop: 10, borderTopWidth: 1, borderTopColor: '#f0f0f0' },
+  dateText: { fontSize: 11, color: '#999' },
+  empty: { padding: 50, alignItems: 'center' },
+  emptyText: { fontSize: 16, color: '#999' },
 });
