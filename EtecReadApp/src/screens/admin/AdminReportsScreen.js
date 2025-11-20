@@ -84,22 +84,17 @@ export default function AdminReportsScreen() {
       {/* Overview */}
       {overview && (
         <View style={styles.statsGrid}>
-          <View style={[styles.statCard, { backgroundColor: '#dc2626' }]}>
-            <Text style={styles.statNumber}>{overview.total_loans || 0}</Text>
-            <Text style={styles.statLabel}>Empréstimos</Text>
-          </View>
-          <View style={[styles.statCard, { backgroundColor: '#dc2626' }]}>
-            <Text style={styles.statNumber}>{overview.total_students || 0}</Text>
-            <Text style={styles.statLabel}>Alunos Ativos</Text>
-          </View>
-          <View style={[styles.statCard, { backgroundColor: '#dc2626' }]}>
-            <Text style={styles.statNumber}>{overview.total_books || 0}</Text>
-            <Text style={styles.statLabel}>Livros Cadastrados</Text>
-          </View>
-          <View style={[styles.statCard, { backgroundColor: '#dc2626' }]}>
-            <Text style={styles.statNumber}>{overview.total_categories || 0}</Text>
-            <Text style={styles.statLabel}>Categorias</Text>
-          </View>
+          {[
+            { key: 'total-loans', value: overview.total_loans || 0, label: 'Empréstimos' },
+            { key: 'total-students', value: overview.total_students || 0, label: 'Alunos Ativos' },
+            { key: 'total-books', value: overview.total_books || 0, label: 'Livros Cadastrados' },
+            { key: 'total-categories', value: overview.total_categories || 0, label: 'Categorias' },
+          ].map((stat) => (
+            <View key={stat.key} style={[styles.statCard, { backgroundColor: '#dc2626' }]}>
+              <Text style={styles.statNumber}>{stat.value}</Text>
+              <Text style={styles.statLabel}>{stat.label}</Text>
+            </View>
+          ))}
         </View>
       )}
 
@@ -108,12 +103,12 @@ export default function AdminReportsScreen() {
         <View style={styles.reportContainer}>
           <View style={styles.metricsContainer}>
             {[
-              { label: 'Empréstimos', value: reportData.loans_count, change: reportData.loans_change },
-              { label: 'Devoluções', value: reportData.returns_count, change: reportData.returns_change },
-              { label: 'Atrasos', value: reportData.overdue_count, change: reportData.overdue_change },
-              { label: 'Novos Alunos', value: reportData.new_students, change: reportData.students_change },
-            ].map((metric, i) => (
-              <View key={i} style={styles.metricCard}>
+              { id: 'loans', label: 'Empréstimos', value: reportData.loans_count, change: reportData.loans_change },
+              { id: 'returns', label: 'Devoluções', value: reportData.returns_count, change: reportData.returns_change },
+              { id: 'overdue', label: 'Atrasos', value: reportData.overdue_count, change: reportData.overdue_change },
+              { id: 'students', label: 'Novos Alunos', value: reportData.new_students, change: reportData.students_change },
+            ].map((metric) => (
+              <View key={metric.id} style={styles.metricCard}>
                 <Text style={styles.metricValue}>{metric.value || 0}</Text>
                 <Text style={styles.metricLabel}>{metric.label}</Text>
                 <Text style={[styles.metricChange, metric.change >= 0 ? styles.metricChangeUp : styles.metricChangeDown]}>
@@ -164,31 +159,48 @@ export default function AdminReportsScreen() {
           <View style={styles.summarySection}>
             <Text style={styles.summaryTitle}>💡 Resumo de Performance</Text>
 
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Taxa de Devolução no Prazo</Text>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: `${reportData.on_time_return_rate || 0}%`, backgroundColor: '#4CAF50' }]} />
+            {[
+              {
+                key: 'on-time-rate',
+                label: 'Taxa de Devolução no Prazo',
+                type: 'progress',
+                value: reportData.on_time_return_rate || 0,
+                color: '#4CAF50'
+              },
+              {
+                key: 'utilization-rate',
+                label: 'Taxa de Utilização do Acervo',
+                type: 'progress',
+                value: reportData.utilization_rate || 0,
+                color: '#2196F3'
+              },
+              {
+                key: 'avg-loans',
+                label: 'Média de Empréstimos por Aluno',
+                type: 'large',
+                value: reportData.avg_loans_per_student?.toFixed(1) || '0.0'
+              },
+              {
+                key: 'avg-duration',
+                label: 'Tempo Médio de Empréstimo',
+                type: 'large',
+                value: `${reportData.avg_loan_duration || 0} dias`
+              }
+            ].map((item) => (
+              <View key={item.key} style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>{item.label}</Text>
+                {item.type === 'progress' ? (
+                  <>
+                    <View style={styles.progressBar}>
+                      <View style={[styles.progressFill, { width: `${item.value}%`, backgroundColor: item.color }]} />
+                    </View>
+                    <Text style={styles.summaryValue}>{item.value}%</Text>
+                  </>
+                ) : (
+                  <Text style={styles.summaryValueLarge}>{item.value}</Text>
+                )}
               </View>
-              <Text style={styles.summaryValue}>{reportData.on_time_return_rate || 0}%</Text>
-            </View>
-
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Taxa de Utilização do Acervo</Text>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: `${reportData.utilization_rate || 0}%`, backgroundColor: '#2196F3' }]} />
-              </View>
-              <Text style={styles.summaryValue}>{reportData.utilization_rate || 0}%</Text>
-            </View>
-
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Média de Empréstimos por Aluno</Text>
-              <Text style={styles.summaryValueLarge}>{reportData.avg_loans_per_student?.toFixed(1) || '0.0'}</Text>
-            </View>
-
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Tempo Médio de Empréstimo</Text>
-              <Text style={styles.summaryValueLarge}>{reportData.avg_loan_duration || 0} dias</Text>
-            </View>
+            ))}
           </View>
 
           {/* Botão Download */}

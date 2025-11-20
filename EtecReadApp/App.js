@@ -29,9 +29,8 @@ import MobileHeader from "./src/components/MobileHeader";
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
-// Recebe onLogout como prop 
 function AppDrawer({ user, onLogout }) {
-  const isAdmin = user.role === "admin";
+  const isAdmin = user?.role === "admin";
 
   return (
     <Drawer.Navigator
@@ -39,8 +38,8 @@ function AppDrawer({ user, onLogout }) {
       drawerContent={(props) => (
         <MobileMenu
           {...props}
-          role={user.role}
-          onLogout={onLogout} // Passando a function de logOut
+          role={user?.role}
+          onLogout={onLogout}
         />
       )}
       screenOptions={({ navigation }) =>
@@ -59,25 +58,60 @@ function AppDrawer({ user, onLogout }) {
       {/* ROTAS ADMIN */}
       {isAdmin && (
         <>
-          <Drawer.Screen name="Dashboard" component={AdminDashboardScreen} />
-          <Drawer.Screen name="Loans" component={AdminLoansScreen} />
+          <Drawer.Screen 
+            name="Dashboard" 
+            component={AdminDashboardScreen}
+            options={{ title: 'Dashboard' }}
+          />
+          <Drawer.Screen 
+            name="Loans" 
+            component={AdminLoansScreen}
+            options={{ title: 'Empréstimos' }}
+          />
           <Drawer.Screen
             name="Reservations"
             component={AdminReservationsScreen}
+            options={{ title: 'Reservas' }}
           />
-          <Drawer.Screen name="Reports" component={AdminReportsScreen} />
-          <Drawer.Screen name="Settings" component={AdminSettingsScreen} />
+          <Drawer.Screen 
+            name="Reports" 
+            component={AdminReportsScreen}
+            options={{ title: 'Relatórios' }}
+          />
+          <Drawer.Screen name="Settings">
+            {(props) => <AdminSettingsScreen {...props} onLogout={onLogout} />}
+          </Drawer.Screen>
         </>
       )}
 
       {/* ROTAS ALUNO*/}
       {!isAdmin && (
         <>
-          <Drawer.Screen name="Catalog" component={CatalogScreen} />
-          <Drawer.Screen name="MyLoans" component={MyLoansScreen} />
-          <Drawer.Screen name="Search" component={AdvancedSearchScreen} />
-          <Drawer.Screen name="Profile" component={ProfileScreen} />
-          <Drawer.Screen name="Support" component={SupportScreen} />
+          <Drawer.Screen 
+            name="Catalog" 
+            component={CatalogScreen}
+            options={{ title: 'Catálogo' }}
+          />
+          <Drawer.Screen 
+            name="MyLoans" 
+            component={MyLoansScreen}
+            options={{ title: 'Meus Empréstimos' }}
+          />
+          <Drawer.Screen 
+            name="Search" 
+            component={AdvancedSearchScreen}
+            options={{ title: 'Busca Avançada' }}
+          />
+          <Drawer.Screen 
+            name="Profile" 
+            component={ProfileScreen}
+            options={{ title: 'Perfil' }}
+          />
+          <Drawer.Screen 
+            name="Support" 
+            component={SupportScreen}
+            options={{ title: 'Suporte' }}
+          />
         </>
       )}
     </Drawer.Navigator>
@@ -92,7 +126,11 @@ export default function App() {
     async function loadUser() {
       try {
         const data = await AsyncStorage.getItem("user");
-        if (data) setUser(JSON.parse(data));
+        if (data) {
+          const parsedUser = JSON.parse(data);
+          console.log('Usuário carregado:', parsedUser);
+          setUser(parsedUser);
+        }
       } catch (e) {
         console.log("Erro ao carregar user", e);
       } finally {
@@ -102,10 +140,14 @@ export default function App() {
     loadUser();
   }, []);
 
-  // FUNÇÃO QUE LIMPA O ESTADO DO USUÁRIO
   async function handleLogout() {
-    await AsyncStorage.removeItem("user");
-    setUser(null);
+    try {
+      await AsyncStorage.removeItem("user");
+      await AsyncStorage.removeItem("token");
+      setUser(null);
+    } catch (e) {
+      console.log("Erro ao fazer logout", e);
+    }
   }
 
   if (loading) {
@@ -132,7 +174,6 @@ export default function App() {
           </Stack.Screen>
         ) : (
           <Stack.Screen name="MainDrawer">
-            {/* ✅ PASSANDO handleLogout para AppDrawer */}
             {(props) => <AppDrawer {...props} user={user} onLogout={handleLogout} />}
           </Stack.Screen>
         )}
