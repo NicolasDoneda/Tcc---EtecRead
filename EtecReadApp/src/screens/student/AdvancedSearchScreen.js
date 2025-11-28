@@ -5,10 +5,10 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
-  Image,
-  StyleSheet,
   ActivityIndicator,
+  StyleSheet,
 } from 'react-native';
+import { Search, Filter, Book, Star } from 'lucide-react-native';
 import api from '../../services/api';
 
 export default function AdvancedSearchScreen({ navigation }) {
@@ -43,15 +43,11 @@ export default function AdvancedSearchScreen({ navigation }) {
       alert('Digite algo para buscar');
       return;
     }
-
     setLoading(true);
     setSearched(true);
-
     try {
       const response = await api.catalog.search(searchQuery, filter);
-      if (response.success) {
-        setResults(response.data);
-      }
+      if (response.success) setResults(response.data);
     } catch (error) {
       console.error('Erro na busca:', error);
       alert('Erro ao realizar busca');
@@ -81,108 +77,100 @@ export default function AdvancedSearchScreen({ navigation }) {
   );
 
   const renderResult = ({ item }) => (
-    <TouchableOpacity style={styles.resultCard}>
-      <Image
-        source={{ uri: item.cover_image || 'https://via.placeholder.com/60x90' }}
-        style={styles.cover}
-      />
-      <View style={styles.resultInfo}>
-        <Text style={styles.resultTitle} numberOfLines={2}>
-          {item.title}
-        </Text>
-        <Text style={styles.resultCategory}>{item.category}</Text>
-        {item.authors && (
-          <Text style={styles.resultAuthors} numberOfLines={1}>
-            {item.authors}
-          </Text>
-        )}
-        <Text
-          style={[
-            styles.availability,
-            item.available_quantity > 0 ? styles.available : styles.unavailable,
-          ]}
-        >
-          {item.available_quantity > 0 ? '✓ Disponível' : '✗ Indisponível'}
-        </Text>
+    <View style={styles.card}>
+      <View style={styles.cardLeft}>
+        <View style={styles.coverPlaceholder}>
+          <Book size={24} color="#fff" />
+        </View>
       </View>
-    </TouchableOpacity>
+
+      <View style={styles.cardRight}>
+        <View style={styles.cardHeader}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.bookTitle} numberOfLines={1}>
+              {item.title}
+            </Text>
+            <Text style={styles.bookAuthor} numberOfLines={1}>
+              {item.authors && item.authors.length > 0
+                ? item.authors.map(a => a.name).join(', ')
+                : 'Desconhecido'}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.badge,
+              item.available_quantity > 0
+                ? styles.availableBadge
+                : styles.unavailableBadge,
+            ]}
+          >
+            <Text style={styles.badgeText}>
+              {item.available_quantity > 0 ? 'Disponível' : 'Indisponível'}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.cardFooter}>
+          <View style={styles.rating}>
+            <Star size={12} color="#FACC15" />
+            <Text style={styles.ratingText}>{item.rating || '-'}</Text>
+          </View>
+          <View style={styles.categoryBadge}>
+            <Text style={styles.categoryText}>
+              {item.category?.name || '-'}
+            </Text>
+          </View>
+          <Text style={styles.stockText}>
+            {item.available_quantity}/{item.total_quantity || '-'} disponíveis
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          style={[
+            styles.loanButton,
+            item.available_quantity === 0 && styles.disabledButton,
+          ]}
+          disabled={item.available_quantity === 0}
+        >
+          <Text style={styles.loanButtonText}>
+            {item.available_quantity > 0 ? 'Solicitar Empréstimo' : 'Indisponível'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
-
-  const renderSuggestions = () => {
-    if (filter === 'category') {
-      return (
-        <View style={styles.suggestionsContainer}>
-          <Text style={styles.suggestionsTitle}>Categorias populares:</Text>
-          <View style={styles.suggestionsGrid}>
-            {categories.slice(0, 6).map((category) => (
-              <TouchableOpacity
-                key={category.id}
-                style={styles.suggestionChip}
-                onPress={() => {
-                  setSearchQuery(category.name);
-                  handleSearch();
-                }}
-              >
-                <Text style={styles.suggestionText}>{category.name}</Text>
-                <Text style={styles.suggestionCount}>({category.books_count})</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      );
-    }
-
-    if (filter === 'author') {
-      return (
-        <View style={styles.suggestionsContainer}>
-          <Text style={styles.suggestionsTitle}>Autores populares:</Text>
-          <View style={styles.suggestionsGrid}>
-            {authors.slice(0, 6).map((author) => (
-              <TouchableOpacity
-                key={author.id}
-                style={styles.suggestionChip}
-                onPress={() => {
-                  setSearchQuery(author.name);
-                  handleSearch();
-                }}
-              >
-                <Text style={styles.suggestionText}>{author.name}</Text>
-                <Text style={styles.suggestionCount}>({author.books_count})</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      );
-    }
-
-    return null;
-  };
 
   return (
     <View style={styles.container}>
+      {/* Search */}
       <View style={styles.searchContainer}>
+        <Search size={20} color="#9CA3AF" style={{ position: 'absolute', left: 15, top: 12 }} />
         <TextInput
           style={styles.searchInput}
-          placeholder={`Buscar por ${filter === 'title' ? 'título' : filter === 'category' ? 'categoria' : 'autor'}...`}
+          placeholder={`Buscar por ${
+            filter === 'title' ? 'título' : filter === 'category' ? 'categoria' : 'autor'
+          }`}
           value={searchQuery}
           onChangeText={setSearchQuery}
           onSubmitEditing={handleSearch}
           returnKeyType="search"
         />
-        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-          <Text style={styles.searchButtonText}>🔍</Text>
+        <TouchableOpacity style={styles.filterButtonIcon}>
+          <Filter size={20} color="#fff" />
         </TouchableOpacity>
       </View>
 
+      {/* Filters */}
       <View style={styles.filtersContainer}>
         {renderFilterButton('title', 'Título', '📚')}
         {renderFilterButton('category', 'Categoria', '📂')}
         {renderFilterButton('author', 'Autor', '✍️')}
       </View>
 
+      {/* Results */}
       {loading ? (
         <View style={styles.loading}>
-          <ActivityIndicator size="large" color="#007AFF" />
+          <ActivityIndicator size="large" color="#EF4444" />
         </View>
       ) : searched ? (
         <FlatList
@@ -190,198 +178,112 @@ export default function AdvancedSearchScreen({ navigation }) {
           renderItem={renderResult}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.resultsContainer}
-          ListHeaderComponent={
-            <Text style={styles.resultsCount}>
-              {results.length} resultado(s) encontrado(s)
-            </Text>
-          }
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text style={styles.emptyText}>Nenhum resultado encontrado</Text>
-              <Text style={styles.emptyHint}>Tente buscar por outro termo</Text>
             </View>
           }
         />
-      ) : (
-        renderSuggestions()
-      )}
+      ) : null}
     </View>
   );
 }
 
+
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
+  container: { flex: 1, backgroundColor: '#F3F4F6' },
   searchContainer: {
     flexDirection: 'row',
-    padding: 15,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: '#fff',
+    margin: 15,
+    borderRadius: 10,
+    position: 'relative',
   },
   searchInput: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
-    padding: 12,
+    padding: 10,
+    paddingLeft: 40,
+    backgroundColor: '#F9FAFB',
     borderRadius: 8,
-    marginRight: 10,
     fontSize: 16,
   },
-  searchButton: {
-    backgroundColor: '#007AFF',
-    padding: 12,
+  filterButtonIcon: {
+    backgroundColor: '#EF4444',
+    padding: 10,
     borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 50,
-  },
-  searchButtonText: {
-    fontSize: 20,
+    marginLeft: 10,
   },
   filtersContainer: {
     flexDirection: 'row',
-    padding: 15,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    justifyContent: 'space-between',
+    paddingHorizontal: 15,
+    marginBottom: 10,
   },
   filterButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 10,
     marginHorizontal: 5,
-    backgroundColor: '#f0f0f0',
+    padding: 10,
     borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   filterButtonActive: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#EF4444',
   },
-  filterIcon: {
-    fontSize: 18,
-    marginRight: 5,
+  filterText: { fontSize: 14, color: '#6B7280' },
+  filterTextActive: { color: '#fff', fontWeight: 'bold' },
+  filterIcon: { marginRight: 5 },
+  loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  resultsContainer: { paddingHorizontal: 15, paddingBottom: 20 },
+  card: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
   },
-  filterText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  filterTextActive: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  loading: {
-    flex: 1,
+  cardLeft: {},
+  coverPlaceholder: {
+    width: 60,
+    height: 90,
+    borderRadius: 8,
+    backgroundColor: '#9CA3AF',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  resultsContainer: {
-    padding: 15,
-  },
-  resultsCount: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 15,
-  },
-  resultCard: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  cover: {
-    width: 60,
-    height: 90,
-    borderRadius: 5,
-  },
-  resultInfo: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  resultTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
-  },
-  resultCategory: {
-    fontSize: 13,
-    color: '#666',
-    marginBottom: 2,
-  },
-  resultAuthors: {
-    fontSize: 12,
-    color: '#999',
-    fontStyle: 'italic',
-    marginBottom: 6,
-  },
-  availability: {
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  available: {
-    color: '#4CAF50',
-  },
-  unavailable: {
-    color: '#F44336',
-  },
-  empty: {
-    padding: 50,
+  cardRight: { flex: 1, marginLeft: 12 },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  bookTitle: { fontSize: 16, fontWeight: 'bold', color: '#111827' },
+  bookAuthor: { fontSize: 13, color: '#6B7280', marginTop: 2 },
+  badge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 12 },
+  availableBadge: { backgroundColor: '#22C55E' },
+  unavailableBadge: { backgroundColor: '#EF4444' },
+  badgeText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
+  cardFooter: { flexDirection: 'row', alignItems: 'center', marginTop: 6, marginBottom: 8, flexWrap: 'wrap' },
+  rating: { flexDirection: 'row', alignItems: 'center', marginRight: 10 },
+  ratingText: { fontSize: 12, color: '#6B7280', marginLeft: 3 },
+  categoryBadge: { backgroundColor: '#E5E7EB', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 12, marginRight: 10 },
+  categoryText: { fontSize: 12, color: '#374151' },
+  stockText: { fontSize: 12, color: '#6B7280' },
+  loanButton: {
+    backgroundColor: '#EF4444',
+    paddingVertical: 8,
+    borderRadius: 8,
     alignItems: 'center',
+    marginTop: 5,
   },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#999',
-    marginBottom: 5,
-  },
-  emptyHint: {
-    fontSize: 14,
-    color: '#ccc',
-  },
-  suggestionsContainer: {
-    padding: 15,
-  },
-  suggestionsTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 15,
-  },
-  suggestionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  suggestionChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 20,
-    marginRight: 10,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  suggestionText: {
-    fontSize: 14,
-    color: '#333',
-    marginRight: 5,
-  },
-  suggestionCount: {
-    fontSize: 12,
-    color: '#999',
-  },
+  disabledButton: { backgroundColor: '#D1D5DB' },
+  loanButtonText: { color: '#fff', fontSize: 14, fontWeight: 'bold' },
+  empty: { padding: 50, alignItems: 'center' },
+  emptyText: { fontSize: 16, color: '#9CA3AF', fontWeight: 'bold' },
 });

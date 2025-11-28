@@ -1,6 +1,5 @@
 // src/screens/student/ProfileScreen.js
-// ✅ VERSÃO ATUALIZADA - SEM WARNINGS
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, TextInput, StyleSheet, ScrollView, Alert, ActivityIndicator, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../../contexts/AuthContext';
@@ -20,17 +19,20 @@ export default function ProfileScreen() {
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
 
+  // Atualiza estado local se o usuário mudar no contexto
+  useEffect(() => {
+    setName(user?.name || '');
+  }, [user]);
+
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
     if (status !== 'granted') {
       Alert.alert('Permissão negada', 'Precisamos de acesso às suas fotos');
       return;
     }
 
-    // ✅ CORRIGIDO: Usar novo formato sem MediaTypeOptions
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'], // ✅ Novo formato correto
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
@@ -43,7 +45,6 @@ export default function ProfileScreen() {
 
   const handleSave = async () => {
     setLoading(true);
-
     try {
       const formData = new FormData();
       formData.append('name', name);
@@ -55,19 +56,26 @@ export default function ProfileScreen() {
         formData.append('photo', {
           uri: Platform.OS === 'ios' ? selectedImage.uri.replace('file://', '') : selectedImage.uri,
           name: `photo.${fileType}`,
-          type: `image/${fileType}`,
+          type: `image/${fileType.toLowerCase()}`,
         });
       }
 
-      const response = await api.auth.updateProfile(formData);
-      
-      if (response.success) {
-        await updateUserData();
+      const response = await api.auth.updateProfile(formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      if (response?.success) {
+        await updateUserData(); // atualiza contexto
+        setName(response.data.name); // atualiza nome local
+        setSelectedImage({ uri: `${response.data.photo_url}?t=${new Date().getTime()}` }); // atualiza imagem com timestamp
         setEditing(false);
-        setSelectedImage(null);
         Alert.alert('Sucesso', 'Perfil atualizado com sucesso!');
+      } else {
+        console.log('Resposta da API:', response);
+        Alert.alert('Erro', 'Não foi possível atualizar o perfil');
       }
     } catch (error) {
+      console.log('Erro ao atualizar perfil:', error);
       Alert.alert('Erro', 'Não foi possível atualizar o perfil');
     } finally {
       setLoading(false);
@@ -85,11 +93,9 @@ export default function ProfileScreen() {
     );
   };
 
-  // URL de avatar com fallback melhorado
   const getAvatarUri = () => {
     if (selectedImage?.uri) return selectedImage.uri;
-    if (user?.photo_url) return user.photo_url;
-    // Fallback com UI Avatars
+    if (user?.photo_url) return `${user.photo_url}?t=${new Date().getTime()}`;
     const userName = encodeURIComponent(user?.name || 'User');
     return `https://ui-avatars.com/api/?name=${userName}&size=150&background=007AFF&color=fff&bold=true`;
   };
@@ -199,10 +205,7 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
+  container: { flex: 1, backgroundColor: '#f5f5f5' },
   header: {
     backgroundColor: 'white',
     alignItems: 'center',
@@ -211,104 +214,32 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 30,
     ...shadow(5),
   },
-  avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 4,
-    borderColor: '#007AFF',
-  },
+  avatar: { width: 120, height: 120, borderRadius: 60, borderWidth: 4, borderColor: '#007AFF' },
   editIconContainer: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: '#007AFF',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
+    position: 'absolute', bottom: 0, right: 0,
+    backgroundColor: '#007AFF', width: 36, height: 36, borderRadius: 18,
+    justifyContent: 'center', alignItems: 'center',
   },
-  editIcon: {
-    fontSize: 18,
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 15,
-  },
+  editIcon: { fontSize: 18 },
+  name: { fontSize: 24, fontWeight: 'bold', color: '#333', marginTop: 15 },
   nameInput: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 15,
-    borderBottomWidth: 2,
-    borderBottomColor: '#007AFF',
-    paddingHorizontal: 20,
-    textAlign: 'center',
+    fontSize: 22, fontWeight: 'bold', color: '#333',
+    marginTop: 15, borderBottomWidth: 2, borderBottomColor: '#007AFF',
+    paddingHorizontal: 20, textAlign: 'center',
   },
-  roleBadge: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 10,
-  },
-  adminBadge: {
-    backgroundColor: '#FF9800',
-  },
-  alunoBadge: {
-    backgroundColor: '#4CAF50',
-  },
-  roleText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  infoContainer: {
-    padding: 20,
-  },
-  infoCard: {
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    ...shadow(2),
-  },
-  infoLabel: {
-    fontSize: 12,
-    color: '#999',
-    marginBottom: 5,
-  },
-  infoValue: {
-    fontSize: 16,
-    color: '#333',
-    fontWeight: '500',
-  },
-  buttonsContainer: {
-    padding: 20,
-  },
-  button: {
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  editButton: {
-    backgroundColor: '#007AFF',
-  },
-  saveButton: {
-    backgroundColor: '#4CAF50',
-  },
-  cancelButton: {
-    backgroundColor: '#9E9E9E',
-  },
-  logoutButton: {
-    backgroundColor: '#F44336',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+  roleBadge: { paddingHorizontal: 20, paddingVertical: 8, borderRadius: 20, marginTop: 10 },
+  adminBadge: { backgroundColor: '#FF9800' },
+  alunoBadge: { backgroundColor: '#4CAF50' },
+  roleText: { color: 'white', fontWeight: 'bold', fontSize: 14 },
+  infoContainer: { padding: 20 },
+  infoCard: { backgroundColor: 'white', padding: 15, borderRadius: 10, marginBottom: 10, ...shadow(2) },
+  infoLabel: { fontSize: 12, color: '#999', marginBottom: 5 },
+  infoValue: { fontSize: 16, color: '#333', fontWeight: '500' },
+  buttonsContainer: { padding: 20 },
+  button: { padding: 15, borderRadius: 10, alignItems: 'center', marginBottom: 10 },
+  editButton: { backgroundColor: '#007AFF' },
+  saveButton: { backgroundColor: '#4CAF50' },
+  cancelButton: { backgroundColor: '#9E9E9E' },
+  logoutButton: { backgroundColor: '#F44336' },
+  buttonText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
 });

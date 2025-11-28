@@ -31,7 +31,6 @@ const request = async (endpoint, options = {}) => {
       headers['Authorization'] = 'Bearer ' + token;
     }
     
-    // Remove Content-Type se for FormData
     if (options.body instanceof FormData) {
       delete headers['Content-Type'];
     }
