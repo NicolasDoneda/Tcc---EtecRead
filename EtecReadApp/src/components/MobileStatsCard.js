@@ -14,7 +14,6 @@ export function MobileStatsCards({ stats }) {
     { key: 'total_books', title: 'Total de Livros', value: stats?.total_books ?? '-', icon: 'books', color: '#ef4444' },
     { key: 'active_loans', title: 'Empréstimos Ativos', value: stats?.active_loans ?? '-', icon: 'loan', color: '#059669' },
     { key: 'total_students', title: 'Usuários Ativos', value: stats?.total_students ?? '-', icon: 'users', color: '#2563eb' },
-    { key: 'utilization_rate', title: 'Taxa de Utilização', value: stats?.utilization_rate ? `${stats.utilization_rate}%` : '-', icon: 'trend', color: '#f97316' },
   ];
 
   return (

@@ -13,12 +13,12 @@ export default function MobileHeader({ onMenuClick, isMenuOpen }) {
     >
       <View style={styles.leftContainer}>
         <TouchableOpacity onPress={onMenuClick} style={styles.iconButton}>
-          <Menu size={26} color="#fff" />
+          <Menu size={30} color="#fff" />
         </TouchableOpacity>
 
         <View>
           <Text style={styles.title}>EtecRead</Text>
-          <Text style={styles.subtitle}>Dashboard Admin</Text>
+          <Text style={styles.subtitle}>Administrador</Text>
         </View>
       </View>
     </View>
@@ -27,8 +27,8 @@ export default function MobileHeader({ onMenuClick, isMenuOpen }) {
 
 const styles = StyleSheet.create({
   header: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 18,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -51,9 +51,6 @@ const styles = StyleSheet.create({
   subtitle: {
     color: "#e5e7eb",
     fontSize: 12,
-  },
-  notificationBtn: {
-    padding: 6,
   },
   badge: {
     position: "absolute",

@@ -113,8 +113,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#1f2937",
   },
   header: {
-    paddingHorizontal: 16,
-    paddingBottom: 14,
+    paddingHorizontal: 18,
+    paddingVertical: 22,
+    paddingBottom: 19,
     flexDirection: "row",
     justifyContent: "space-between",
     borderBottomWidth: 1,
@@ -148,8 +149,8 @@ const styles = StyleSheet.create({
   },
   userSection: {
     paddingHorizontal: 16,
-    marginBottom: 10,
     marginTop: 16,
+    marginBottom: 10,
   },
   userBox: {
     flexDirection: "row",

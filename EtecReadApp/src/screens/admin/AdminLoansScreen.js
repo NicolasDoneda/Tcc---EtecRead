@@ -114,6 +114,7 @@ export default function AdminLoansScreen() {
           </Text>
         </View>
         <View style={styles.dateContainer}>
+          <Text style={styles.dateLabel}>Devolução:</Text>
           <Text style={[
             styles.dateValue,
             item.is_overdue && styles.overdueDate
@@ -126,7 +127,7 @@ export default function AdminLoansScreen() {
       {item.is_overdue && (
         <View style={styles.overdueWarning}>
           <Text style={styles.overdueText}>
-            ⚠️ {item.days_overdue} dias de atraso
+              {item.days_overdue} dias de atraso
           </Text>
         </View>
       )}
@@ -192,8 +193,7 @@ const styles = StyleSheet.create({
   tabsContainer: {
     flexDirection: 'row',
     marginTop: 10,
-    marginHorizontal: 5,
-    borderRadius: 10,
+    marginBottom: 10,
     overflow: 'hidden',
   },
   tabButton: {
@@ -203,42 +203,169 @@ const styles = StyleSheet.create({
     backgroundColor: '#eee',
   },
   activeTabButton: {
-    backgroundColor: '#dc2626', // vermelho
+    backgroundColor: '#dc2626', 
   },
   tabText: {
     color: '#333',
     fontWeight: '500',
   },
   activeTabText: {
-    color: '#fff', // texto branco
+    color: '#fff', 
     fontWeight: '700',
   },
 
-  listContent: { padding: 15 },
-  statsContainer: { flexDirection: 'row', marginBottom: 15 },
-  statCard: { flex: 1, backgroundColor: 'white', padding: 12, borderRadius: 10, marginHorizontal: 3, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
-  statNumber: { fontSize: 24, fontWeight: 'bold', color: '#007AFF' },
-  statLabel: { fontSize: 11, color: '#666', marginTop: 2 },
-  loanCard: { backgroundColor: 'white', borderRadius: 12, padding: 15, marginBottom: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
-  loanHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 },
-  studentName: { fontSize: 16, fontWeight: 'bold', color: '#333' },
-  studentInfo: { fontSize: 12, color: '#999', marginTop: 2 },
-  statusBadge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
-  activeBadge: { backgroundColor: '#E8F5E9' },
-  finishedBadge: { backgroundColor: '#E0E0E0' },
-  overdueBadge: { backgroundColor: '#FFEBEE' },
-  statusText: { fontSize: 10, fontWeight: 'bold', color: '#333' },
-  loanBody: { marginBottom: 12 },
-  bookTitle: { fontSize: 15, fontWeight: '600', color: '#333', marginBottom: 4 },
-  bookCategory: { fontSize: 13, color: '#666' },
-  loanFooter: { flexDirection: 'row', justifyContent: 'space-between' },
-  dateContainer: { flex: 1 },
-  dateLabel: { fontSize: 11, color: '#999' },
-  dateValue: { fontSize: 13, color: '#333', fontWeight: '500', marginTop: 2 },
-  overdueDate: { color: '#F44336', fontWeight: 'bold' },
-  overdueWarning: { marginTop: 10, padding: 8, backgroundColor: '#FFEBEE', borderRadius: 6 },
-  overdueText: { fontSize: 12, color: '#D32F2F', fontWeight: 'bold' },
-  empty: { padding: 50, alignItems: 'center' },
-  emptyText: { fontSize: 16, color: '#999' },
-});
+  listContent: {
+  padding: 15,
+},
 
+  statsContainer: {
+    flexDirection: 'row',
+    marginBottom: 15,
+  },
+
+  statCard: {
+    flex: 1,
+    backgroundColor: 'white',
+    padding: 12,
+    borderRadius: 10,
+    marginHorizontal: 3,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+
+  statNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#007AFF',
+  },
+
+  statLabel: {
+    fontSize: 11,
+    color: '#666',
+    marginTop: 2,
+  },
+
+  loanCard: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  loanHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+
+  studentName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+
+  studentInfo: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
+  },
+
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 12,
+  },
+
+  activeBadge: {
+    backgroundColor: '#E8F5E9',
+  },
+
+  finishedBadge: {
+    backgroundColor: '#E0E0E0',
+  },
+
+  overdueBadge: {
+    backgroundColor: '#FFEBEE',
+  },
+
+  statusText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+
+  loanBody: {
+    marginBottom: 12,
+  },
+
+  bookTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+
+  bookCategory: {
+    fontSize: 13,
+    color: '#666',
+  },
+
+  loanFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  dateContainer: {
+    flex: 1,
+  },
+
+  dateLabel: {
+    fontSize: 11,
+    color: '#999',
+  },
+
+  dateValue: {
+    fontSize: 13,
+    color: '#333',
+    fontWeight: '500',
+    marginTop: 2,
+  },
+
+  overdueDate: {
+    color: '#F44336',
+    fontWeight: 'bold',
+  },
+
+  overdueWarning: {
+    marginTop: 10,
+    padding: 8,
+    backgroundColor: '#FFEBEE',
+    borderRadius: 6,
+  },
+
+  overdueText: {
+    fontSize: 12,
+    color: '#D32F2F',
+    fontWeight: 'bold',
+  },
+
+  empty: {
+    padding: 50,
+    alignItems: 'center',
+  },
+
+  emptyText: {
+    fontSize: 16,
+    color: '#999',
+  },
+});

@@ -18,7 +18,7 @@ export default function MobileHeader({ onMenuClick, isMenuOpen }) {
 
         <View>
           <Text style={styles.title}>EtecRead</Text>
-          <Text style={styles.subtitle}>Painel do Aluno</Text>
+          <Text style={styles.subtitle}>Aluno</Text>
         </View>
       </View>
 
@@ -28,8 +28,8 @@ export default function MobileHeader({ onMenuClick, isMenuOpen }) {
 
 const styles = StyleSheet.create({
   header: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 18,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -52,9 +52,6 @@ const styles = StyleSheet.create({
   subtitle: {
     color: "#e5e7eb",
     fontSize: 12,
-  },
-  notificationBtn: {
-    padding: 6,
   },
   badge: {
     position: "absolute",

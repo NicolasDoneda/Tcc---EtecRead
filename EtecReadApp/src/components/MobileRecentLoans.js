@@ -3,6 +3,30 @@ import { View, Text, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 
 export function MobileRecentLoans({ loans = [] }) {
+  // Função para formatar o status
+  const getStatusDisplay = (status) => {
+    const statusMap = {
+      'ativo': 'Ativo',
+      'finalizado': 'Finalizado',
+      'atrasado': 'Atrasado',
+    };
+    return statusMap[status?.toLowerCase()] || status;
+  };
+
+  // Função para obter o estilo do badge baseado no status
+  const getBadgeStyle = (status) => {
+    switch(status?.toLowerCase()) {
+      case 'ativo':
+        return styles.badgeActive;
+      case 'atrasado':
+        return styles.badgeLate;
+      case 'finalizado':
+        return styles.badgeFinished;
+      default:
+        return styles.badgeActive;
+    }
+  };
+
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -10,16 +34,18 @@ export function MobileRecentLoans({ loans = [] }) {
         <Text style={styles.headerTitle}>  Empréstimos Recentes</Text>
       </View>
 
-      {loans.map((loan) => (
+      {loans.slice(0, 6).map((loan) => (
         <View key={loan.id} style={styles.item}>
           <View style={styles.rowBetween}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.bookTitle} numberOfLines={1}>{loan.book_title ?? loan.book}</Text>
+              <Text style={styles.bookTitle} numberOfLines={1}>
+                {loan.book_title ?? loan.book}
+              </Text>
               <Text style={styles.loanId}>#{loan.id}</Text>
             </View>
 
-            <View style={[styles.badge, loan.status === 'Atrasado' || loan.status === 'atrasado' ? styles.badgeLate : styles.badgeOk]}>
-              <Text style={styles.badgeText}>{loan.status === 'ativo' ? 'Ativo' : loan.status}</Text>
+            <View style={[styles.badge, getBadgeStyle(loan.status)]}>
+              <Text style={styles.badgeText}>{getStatusDisplay(loan.status)}</Text>
             </View>
           </View>
 
@@ -28,9 +54,20 @@ export function MobileRecentLoans({ loans = [] }) {
             <Text style={styles.infoText}>{loan.student_name ?? loan.user}</Text>
           </View>
 
-          <View style={styles.infoRow}>
-            <Feather name="calendar" size={14} color="#6b7280" />
-            <Text style={styles.infoText}>Devolução: {loan.loan_date ? new Date(loan.loan_date).toLocaleDateString('pt-BR') : loan.returnDate}</Text>
+          <View style={styles.datesRow}>
+            <View style={styles.dateItem}>
+              <Feather name="calendar" size={14} color="#6b7280" />
+              <Text style={styles.infoText}>
+                Empréstimo: {loan.loan_date ? new Date(loan.loan_date).toLocaleDateString('pt-BR') : 'N/A'}
+              </Text>
+            </View>
+            
+            <View style={styles.dateItem}>
+              <Feather name="calendar" size={14} color="#6b7280" />
+              <Text style={styles.infoText}>
+                Devolução: {loan.due_date ? new Date(loan.due_date).toLocaleDateString('pt-BR') : loan.returnDate}
+              </Text>
+            </View>
           </View>
         </View>
       ))}
@@ -83,11 +120,14 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
   },
-  badgeOk: {
+  badgeActive: {
     backgroundColor: '#16a34a',
   },
   badgeLate: {
     backgroundColor: '#ef4444',
+  },
+  badgeFinished: {
+    backgroundColor: '#6b7280',
   },
   badgeText: {
     color: '#fff',
@@ -100,8 +140,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
+  datesRow: {
+    marginTop: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  dateItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   infoText: {
     marginLeft: 6,
     color: '#6b7280',
+    fontSize: 12,
   },
 });
