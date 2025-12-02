@@ -163,8 +163,16 @@ export default function CatalogScreen() {
 
 const styles = StyleSheet.create({
 
-  container: { flex: 1, backgroundColor: "#f8f8f8" },
-  loading: { flex: 1, justifyContent: "center", alignItems: "center" },
+  container: {
+    flex: 1,
+    backgroundColor: "#f8f8f8",
+  },
+
+  loading: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
   // BUSCA
   searchContainer: {
@@ -172,21 +180,23 @@ const styles = StyleSheet.create({
     padding: 12,
     backgroundColor: "white",
     borderBottomWidth: 1,
-    borderColor: "#e5e7eb"
+    borderColor: "#e5e7eb",
   },
+
   searchInput: {
     flex: 1,
     backgroundColor: "#f3f4f6",
     padding: 10,
     borderRadius: 10,
   },
+
   searchButton: {
     backgroundColor: "#ef4444",
     padding: 10,
     borderRadius: 10,
     marginLeft: 8,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
 
   // ESTATÍSTICA
@@ -195,6 +205,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 18,
   },
+
   statCard: {
     flex: 1,
     backgroundColor: "white",
@@ -203,13 +214,19 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: "center",
   },
+
   statNumber: {
     fontSize: 20,
     fontWeight: "700",
     color: "#111827",
     marginTop: 4,
   },
-  statLabel: { color: "#6b7280", fontSize: 11, marginTop: 2 },
+
+  statLabel: {
+    color: "#6b7280",
+    fontSize: 11,
+    marginTop: 2,
+  },
 
   // LIVROS
   bookCard: {
@@ -219,29 +236,82 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 14,
   },
+
   cover: {
     width: 75,
     height: 110,
     borderRadius: 10,
-    backgroundColor: "#e5e7eb"
+    backgroundColor: "#e5e7eb",
   },
 
-  bookInfo: { flex: 1, marginLeft: 12 },
-  title: { fontSize: 16, fontWeight: "600", color: "#111827" },
-  category: { fontSize: 12, color: "#6b7280", marginTop: 3 },
-  authors: { fontSize: 12, color: "#9ca3af", marginTop: 2 },
+  bookInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
 
-  rowBetween: { flexDirection: "row", justifyContent: "space-between", marginTop: 10 },
+  title: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#111827",
+  },
 
-  availabilityRow: { flexDirection: "row", alignItems: "center" },
+  category: {
+    fontSize: 12,
+    color: "#6b7280",
+    marginTop: 3,
+  },
 
-  badge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
-  badgeAvailable: { backgroundColor: "#16a34a" },
-  badgeUnavailable: { backgroundColor: "#dc2626" },
-  badgeText: { color: "white", fontSize: 11, fontWeight: "600" },
+  authors: {
+    fontSize: 12,
+    color: "#9ca3af",
+    marginTop: 2,
+  },
 
-  quantity: { color: "#6b7280", fontSize: 12, marginLeft: 10 },
+  rowBetween: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
 
-  empty: { padding: 40, alignItems: "center" },
-  emptyText: { color: "#9ca3af", fontSize: 16 }
+  availabilityRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+
+  badgeAvailable: {
+    backgroundColor: "#16a34a",
+  },
+
+  badgeUnavailable: {
+    backgroundColor: "#dc2626",
+  },
+
+  badgeText: {
+    color: "white",
+    fontSize: 11,
+    fontWeight: "600",
+  },
+
+  quantity: {
+    color: "#6b7280",
+    fontSize: 12,
+    marginLeft: 10,
+  },
+
+  empty: {
+    padding: 40,
+    alignItems: "center",
+  },
+
+  emptyText: {
+    color: "#9ca3af",
+    fontSize: 16,
+  },
 });
+

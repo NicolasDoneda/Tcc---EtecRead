@@ -183,6 +183,6 @@ export default {
   myLoans, 
   adminDashboard, 
   adminLoans, 
-  adminReservations, 
+  adminReservations,  
   adminReports,
 };

@@ -239,6 +239,7 @@ export default function AdvancedSearchScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F3F4F6' },
+
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -248,6 +249,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     position: 'relative',
   },
+
   searchInput: {
     flex: 1,
     padding: 10,
@@ -256,18 +258,21 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     fontSize: 16,
   },
+
   filterButtonIcon: {
     backgroundColor: '#EF4444',
     padding: 10,
     borderRadius: 8,
     marginLeft: 10,
   },
+
   filtersContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 15,
     marginBottom: 10,
   },
+
   filterButton: {
     flex: 1,
     marginHorizontal: 5,
@@ -275,19 +280,39 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#F3F4F6',
   },
+
   filterButtonActive: {
     backgroundColor: '#EF4444',
   },
+
   filterContent: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 6,
   },
-  filterText: { fontSize: 14, color: '#6B7280' },
-  filterTextActive: { color: '#fff', fontWeight: 'bold' },
-  loading: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  resultsContainer: { paddingHorizontal: 15, paddingBottom: 20 },
+
+  filterText: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+
+  filterTextActive: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+
+  loading: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  resultsContainer: {
+    paddingHorizontal: 15,
+    paddingBottom: 20,
+  },
+
   card: {
     flexDirection: 'row',
     backgroundColor: '#fff',
@@ -300,25 +325,91 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  cardLeft: {},
+
   coverImage: {
     width: 60,
     height: 90,
     borderRadius: 8,
     backgroundColor: '#E5E7EB',
   },
-  cardRight: { flex: 1, marginLeft: 12 },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  bookTitle: { fontSize: 16, fontWeight: 'bold', color: '#111827' },
-  bookAuthor: { fontSize: 13, color: '#6B7280', marginTop: 2 },
-  badge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 12 },
-  availableBadge: { backgroundColor: '#22C55E' },
-  unavailableBadge: { backgroundColor: '#EF4444' },
-  badgeText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
-  cardFooter: { flexDirection: 'row', alignItems: 'center', marginTop: 6, marginBottom: 8, flexWrap: 'wrap' },
-  categoryBadge: { backgroundColor: '#E5E7EB', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 12, marginRight: 10 },
-  categoryText: { fontSize: 12, color: '#374151' },
-  stockText: { fontSize: 12, color: '#6B7280' },
-  empty: { padding: 50, alignItems: 'center' },
-  emptyText: { fontSize: 16, color: '#9CA3AF', fontWeight: 'bold' },
+
+  cardRight: {
+    flex: 1,
+    marginLeft: 12,
+  },
+
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  bookTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#111827',
+  },
+
+  bookAuthor: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 2,
+  },
+
+  badge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 12,
+  },
+
+  availableBadge: {
+    backgroundColor: '#22C55E',
+  },
+
+  unavailableBadge: {
+    backgroundColor: '#EF4444',
+  },
+
+  badgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+
+  cardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
+    marginBottom: 8,
+    flexWrap: 'wrap',
+  },
+
+  categoryBadge: {
+    backgroundColor: '#E5E7EB',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 12,
+    marginRight: 10,
+  },
+
+  categoryText: {
+    fontSize: 12,
+    color: '#374151',
+  },
+
+  stockText: {
+    fontSize: 12,
+    color: '#6B7280',
+  },
+
+  empty: {
+    padding: 50,
+    alignItems: 'center',
+  },
+
+  emptyText: {
+    fontSize: 16,
+    color: '#9CA3AF',
+    fontWeight: 'bold',
+  },
 });

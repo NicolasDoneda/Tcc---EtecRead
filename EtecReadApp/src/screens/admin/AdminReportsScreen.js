@@ -3,7 +3,6 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
@@ -106,6 +105,20 @@ export default function AdminReportsScreen() {
         </View>
       </View>
 
+      {/* Usuários Ativos */}
+      <View style={styles.section}>
+        <View style={styles.sectionTitleRow}>
+          <Users size={20} color="#111827" />
+          <Text style={styles.sectionTitle}>Usuários Ativos</Text>
+        </View>
+        
+        <View style={styles.userCard}>
+          <Users size={48} color="#2563eb" />
+          <Text style={styles.userValue}>{stats.total_students || 0}</Text>
+          <Text style={styles.userLabel}>Alunos Cadastrados</Text>
+        </View>
+      </View>
+
       {/* Estatísticas do Catálogo */}
       {catalogStats && (
         <View style={styles.section}>
@@ -183,39 +196,6 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
 
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    padding: 12,
-    justifyContent: 'space-between',
-  },
-
-  statCard: {
-    width: '48%',
-    borderRadius: 12,
-    padding: 18,
-    marginBottom: 12,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-
-  statNumber: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-
-  statLabel: {
-    fontSize: 11,
-    color: 'white',
-    marginTop: 6,
-    textAlign: 'center',
-  },
-
   section: {
     margin: 12,
     backgroundColor: 'white',
@@ -239,6 +219,29 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#111827',
+  },
+
+  userCard: {
+    backgroundColor: '#eff6ff',
+    padding: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#bfdbfe',
+  },
+
+  userValue: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#1e40af',
+    marginTop: 12,
+  },
+
+  userLabel: {
+    fontSize: 16,
+    color: '#3b82f6',
+    marginTop: 6,
+    fontWeight: '600',
   },
 
   metricsContainer: {
@@ -295,17 +298,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#111827',
-  },
-
-  progressBarContainer: {
-    height: 8,
-    backgroundColor: '#e5e7eb',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-
-  progressBar: {
-    height: '100%',
-    borderRadius: 4,
   },
 });

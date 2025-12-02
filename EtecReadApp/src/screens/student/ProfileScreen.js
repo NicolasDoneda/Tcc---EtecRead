@@ -66,9 +66,11 @@ export default function ProfileScreen() {
   const [name, setName] = useState(user?.name || '');
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [imageLoadError, setImageLoadError] = useState(false);
 
   useEffect(() => {
     setName(user?.name || '');
+    setImageLoadError(false);
   }, [user]);
 
   const pickImage = async () => {
@@ -87,6 +89,7 @@ export default function ProfileScreen() {
 
     if (!result.canceled) {
       setSelectedImage(result.assets[0]);
+      setImageLoadError(false);
     }
   };
 
@@ -113,17 +116,17 @@ export default function ProfileScreen() {
 
       if (response?.success) {
         await updateUserData();
-        setName(response.data.name);
-        setSelectedImage({ uri: `${response.data.photo_url}?t=${new Date().getTime()}` });
         setEditing(false);
+        setSelectedImage(null);
+        setImageLoadError(false);
         Alert.alert('Sucesso', 'Perfil atualizado com sucesso!');
       } else {
         console.log('Resposta da API:', response);
-        Alert.alert('Erro', 'Não foi possível atualizar o perfil');
+        Alert.alert('Erro', response?.message || 'Não foi possível atualizar o perfil');
       }
     } catch (error) {
       console.log('Erro ao atualizar perfil:', error);
-      Alert.alert('Erro', 'Não foi possível atualizar o perfil');
+      Alert.alert('Erro', error?.response?.data?.message || 'Não foi possível atualizar o perfil');
     } finally {
       setLoading(false);
     }
@@ -141,10 +144,21 @@ export default function ProfileScreen() {
   };
 
   const getAvatarUri = () => {
-    if (selectedImage?.uri) return selectedImage.uri;
-    if (user?.photo_url) return `${user.photo_url}?t=${new Date().getTime()}`;
+    if (editing && selectedImage?.uri) {
+      return selectedImage.uri;
+    }
+    if (user?.photo_url && !imageLoadError) {
+      const baseUrl = user.photo_url.split('?')[0];
+      return `${baseUrl}?t=${Date.now()}`;
+    }
+    
     const userName = encodeURIComponent(user?.name || 'User');
-    return `https://ui-avatars.com/api/?name=${userName}&size=150&background=007AFF&color=fff&bold=true`;
+    return `https://ui-avatars.com/api/?name=${userName}&size=200&background=007AFF&color=fff&bold=true`;
+  };
+
+  const handleImageError = () => {
+    console.log('Erro ao carregar imagem do perfil');
+    setImageLoadError(true);
   };
 
   return (
@@ -154,6 +168,7 @@ export default function ProfileScreen() {
           <Image
             source={{ uri: getAvatarUri() }}
             style={styles.avatar}
+            onError={handleImageError}
           />
           {editing && (
             <View style={styles.editIconContainer}>
@@ -234,6 +249,7 @@ export default function ProfileScreen() {
                 setEditing(false);
                 setName(user?.name || '');
                 setSelectedImage(null);
+                setImageLoadError(false);
               }}
               disabled={loading}
             >

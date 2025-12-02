@@ -6,7 +6,7 @@ const statsIcons = {
   books: () => <MaterialIcons name="menu-book" size={20} color="#fff" />,
   loan: () => <Feather name="book-open" size={20} color="#fff" />,
   users: () => <Ionicons name="people" size={20} color="#fff" />,
-  trend: () => <FontAwesome5 name="chart-line" size={18} color="#fff" />,
+  reservation: () => <MaterialIcons name="event-note" size={20} color="#fff" />,
 };
 
 export function MobileStatsCards({ stats }) {
@@ -14,6 +14,7 @@ export function MobileStatsCards({ stats }) {
     { key: 'total_books', title: 'Total de Livros', value: stats?.total_books ?? '-', icon: 'books', color: '#ef4444' },
     { key: 'active_loans', title: 'Empréstimos Ativos', value: stats?.active_loans ?? '-', icon: 'loan', color: '#059669' },
     { key: 'total_students', title: 'Usuários Ativos', value: stats?.total_students ?? '-', icon: 'users', color: '#2563eb' },
+    { key: 'pending_reservations', title: 'Reservas Pendentes', value: stats?.pending_reservations ?? '-', icon: 'reservation', color: '#f59e0b' },
   ];
 
   return (
