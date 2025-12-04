@@ -8,9 +8,10 @@ import {
   ActivityIndicator,
   StyleSheet,
   Image,
+  Modal,
 } from 'react-native';
-import { Search, Filter } from 'lucide-react-native';
-import Svg, { Path, Rect, G, Circle } from 'react-native-svg';
+import { Search, Filter, X } from 'lucide-react-native';
+import Svg, { Path, Circle } from 'react-native-svg';
 import api from '../../services/api';
 
 // Ícones SVG
@@ -44,6 +45,8 @@ export default function AdvancedSearchScreen({ navigation }) {
   const [authors, setAuthors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   useEffect(() => {
     loadFilters();
@@ -63,15 +66,49 @@ export default function AdvancedSearchScreen({ navigation }) {
     }
   };
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) {
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+    if (newFilter === 'category') {
+      setShowCategoryModal(true);
+      setSearchQuery('');
+      setSelectedCategory(null);
+    } else {
+      setSelectedCategory(null);
+      setSearchQuery('');
+    }
+  };
+
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+    setSearchQuery(category.name);
+    setShowCategoryModal(false);
+
+    performSearch(category);
+  };
+
+  const performSearch = async (category = null) => {
+    const query = category ? category.name : searchQuery;
+    
+    if (!query.trim() && filter !== 'category') {
       alert('Digite algo para buscar');
       return;
     }
+
     setLoading(true);
     setSearched(true);
+    
     try {
-      const response = await api.catalog.search(searchQuery, filter);
+      let response;
+      
+      if (filter === 'category' && (category || selectedCategory)) {
+        const categoryId = category?.id || selectedCategory?.id;
+        response = await api.catalog.getBooks({ 
+          category_id: categoryId 
+        });
+      } else {
+        response = await api.catalog.search(query, filter);
+      }
+      
       if (response.success) {
         setResults(response.data);
       }
@@ -81,6 +118,10 @@ export default function AdvancedSearchScreen({ navigation }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = () => {
+    performSearch();
   };
 
   const getTotalQuantity = (item) => {
@@ -109,7 +150,7 @@ export default function AdvancedSearchScreen({ navigation }) {
         styles.filterButton,
         filter === filterType && styles.filterButtonActive,
       ]}
-      onPress={() => setFilter(filterType)}
+      onPress={() => handleFilterChange(filterType)}
     >
       <View style={styles.filterContent}>
         <IconComponent 
@@ -194,13 +235,21 @@ export default function AdvancedSearchScreen({ navigation }) {
         <Search size={20} color="#9CA3AF" style={{ position: 'absolute', left: 15, top: 12 }} />
         <TextInput
           style={styles.searchInput}
-          placeholder={`Buscar por ${
-            filter === 'title' ? 'título' : filter === 'category' ? 'categoria' : 'autor'
-          }`}
+          placeholder={
+            filter === 'category' 
+              ? 'Selecione uma categoria' 
+              : `Buscar por ${filter === 'title' ? 'título' : 'autor'}`
+          }
           value={searchQuery}
           onChangeText={setSearchQuery}
           onSubmitEditing={handleSearch}
           returnKeyType="search"
+          editable={filter !== 'category'}
+          onFocus={() => {
+            if (filter === 'category') {
+              setShowCategoryModal(true);
+            }
+          }}
         />
         <TouchableOpacity style={styles.filterButtonIcon} onPress={handleSearch}>
           <Search size={20} color="#fff" />
@@ -213,6 +262,20 @@ export default function AdvancedSearchScreen({ navigation }) {
         {renderFilterButton('category', 'Categoria', FolderIcon)}
         {renderFilterButton('author', 'Autor', PenIcon)}
       </View>
+
+      {/* Selected Category Badge */}
+      {selectedCategory && filter === 'category' && (
+        <View style={styles.selectedCategoryContainer}>
+          <View style={styles.selectedCategoryBadge}>
+            <Text style={styles.selectedCategoryText}>
+              {selectedCategory.name}
+            </Text>
+            <TouchableOpacity onPress={() => setShowCategoryModal(true)}>
+              <Text style={styles.changeCategoryText}>Alterar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       {/* Results */}
       {loading ? (
@@ -233,6 +296,41 @@ export default function AdvancedSearchScreen({ navigation }) {
           }
         />
       ) : null}
+
+      {/* Category Modal */}
+      <Modal
+        visible={showCategoryModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowCategoryModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Selecione uma Categoria</Text>
+              <TouchableOpacity onPress={() => setShowCategoryModal(false)}>
+                <X size={24} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+            
+            <FlatList
+              data={categories}
+              keyExtractor={(item) => item.id.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.categoryItem}
+                  onPress={() => handleCategorySelect(item)}
+                >
+                  <Text style={styles.categoryItemText}>{item.name}</Text>
+                  <Text style={styles.categoryItemCount}>
+                    {item.books_count || 0} livros
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -257,6 +355,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
     borderRadius: 8,
     fontSize: 16,
+    placeholderTextColor: 'black',
+
   },
 
   filterButtonIcon: {
@@ -299,6 +399,34 @@ const styles = StyleSheet.create({
 
   filterTextActive: {
     color: '#fff',
+    fontWeight: 'bold',
+  },
+
+  selectedCategoryContainer: {
+    paddingHorizontal: 15,
+    marginBottom: 10,
+  },
+
+  selectedCategoryBadge: {
+    backgroundColor: '#FEE2E2',
+    borderColor: '#EF4444',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  selectedCategoryText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#991B1B',
+  },
+
+  changeCategoryText: {
+    fontSize: 14,
+    color: '#EF4444',
     fontWeight: 'bold',
   },
 
@@ -411,5 +539,57 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#9CA3AF',
     fontWeight: 'bold',
+  },
+
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 20,
+    maxHeight: '70%',
+  },
+
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#111827',
+  },
+
+  categoryItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+
+  categoryItemText: {
+    fontSize: 16,
+    color: '#111827',
+    fontWeight: '500',
+  },
+
+  categoryItemCount: {
+    fontSize: 14,
+    color: '#6B7280',
   },
 });

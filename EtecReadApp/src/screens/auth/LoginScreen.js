@@ -106,7 +106,7 @@ export default function LoginScreen({ setUser }) {
             
           </View>
 
-          <Text style={styles.versionText}>Versão 1.0.0 • ETEC Digital Library</Text>
+          <Text style={styles.versionText}>Versão 1.0.1 • ETEC Digital Library</Text>
         </View>
       </KeyboardAvoidingView>
     </View>
@@ -145,7 +145,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#ddd',
-    marginBottom: 15
+    marginBottom: 15,
+    placeholderTextColor: 'black',
   },
   button: {
     backgroundColor: '#dc2626',

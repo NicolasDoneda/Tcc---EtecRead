@@ -306,7 +306,8 @@ const styles = StyleSheet.create({
   nameInput: {
     fontSize: 22, fontWeight: 'bold', color: '#333',
     marginTop: 15, borderBottomWidth: 2, borderBottomColor: '#007AFF',
-    paddingHorizontal: 20, textAlign: 'center',
+    paddingHorizontal: 20, textAlign: 'center',   placeholderTextColor: 'black',
+
   },
   roleBadge: { paddingHorizontal: 20, paddingVertical: 8, borderRadius: 20, marginTop: 10 },
   adminBadge: { backgroundColor: '#FF9800' },

@@ -188,6 +188,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#f3f4f6",
     padding: 10,
     borderRadius: 10,
+    placeholderTextColor: 'black',
+
   },
 
   searchButton: {

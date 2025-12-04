@@ -1,10 +1,11 @@
 {
   "expo": {
-    "name": "BibliotecaApp",
-    "slug": "bibliotecaapp",
-    "version": "1.0.0",
+    "name": "EtecRead",
+    "slug": "EtecRead",
+    "version": "1.0.1",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
     "assetBundlePatterns": [
       "**/*"
     ],
@@ -20,17 +21,18 @@
       }
     },
     "android": {
+      "icon": "./assets/icon.png",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#dc2626"
       },
       "package": "com.etec.bibliotecaapp",
       "usesCleartextTraffic": true,
       "permissions": [
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
-        "CAMERA",
-        "READ_MEDIA_IMAGES"
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -44,6 +46,12 @@
         }
       ],
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "54c0edee-2774-4778-9b57-4680d813b21a"
+      }
+    },
+    "owner": "gabrielsouzalimaa"
   }
 }
